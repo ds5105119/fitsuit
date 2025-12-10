@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
-import { ThemeProvider } from "@/components/theme-provider";
+import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
+import { SiteHeader } from "@/components/site-header";
+
 
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://chat.vercel.ai"),
-  title: "Next.js Chatbot Template",
-  description: "Next.js chatbot template using the AI SDK.",
+  metadataBase: new URL("https://goldfinger-tailor.com"),
+  title: "GOLD FINGER Tailor",
+  description: "Seoul bespoke atelier for first-class suits, crafted by GOLD FINGER.",
 };
 
 export const viewport = {
@@ -26,6 +25,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-geist-mono",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-playfair",
 });
 
 const LIGHT_THEME_COLOR = "hsl(0 0% 100%)";
@@ -55,7 +60,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className={`${geist.variable} ${geistMono.variable}`}
+      className={`${geist.variable} ${geistMono.variable} ${playfair.variable}`}
       // `next-themes` injects an extra classname to the body element to avoid
       // visual flicker before hydration. Hence the `suppressHydrationWarning`
       // prop is necessary to avoid the React hydration mismatch warning.
@@ -72,15 +77,8 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          disableTransitionOnChange
-          enableSystem
-        >
-          <Toaster position="top-center" />
-          <SessionProvider>{children}</SessionProvider>
-        </ThemeProvider>
+        <SiteHeader />
+        {children}
       </body>
     </html>
   );
