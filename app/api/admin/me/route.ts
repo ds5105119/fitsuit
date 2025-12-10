@@ -1,0 +1,11 @@
+import { NextResponse } from "next/server";
+import { getAdminSession } from "@/lib/auth/admin";
+
+export async function GET() {
+  const session = await getAdminSession();
+
+  return NextResponse.json({
+    authenticated: !!session,
+    username: session?.username ?? null,
+  });
+}
