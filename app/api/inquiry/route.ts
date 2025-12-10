@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       `inquiries/${Date.now()}-${attachment.name}`,
       attachment,
       {
-        access: "private",
+        access: "public",
       }
     );
     attachmentUrl = blob.url;
