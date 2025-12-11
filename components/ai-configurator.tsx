@@ -2,7 +2,7 @@
 
 import NextImage from "next/image";
 import Link from "next/link";
-import { BookmarkIcon, HeartIcon, MenuIcon, PencilIcon, SearchIcon, ShoppingBagIcon, UserRoundIcon } from "lucide-react";
+import { PencilIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ChangeEvent, useMemo, useState } from "react";
 
