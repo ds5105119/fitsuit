@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
+import { LenisProvider } from "@/components/lenis-provider";
 import { SiteHeader } from "@/components/site-header";
 
 
@@ -77,8 +78,10 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <SiteHeader />
-        {children}
+        <LenisProvider>
+          <SiteHeader />
+          {children}
+        </LenisProvider>
       </body>
     </html>
   );

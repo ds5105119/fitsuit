@@ -1,0 +1,16 @@
+CREATE TABLE "AdminUser" (
+	"username" varchar(64) PRIMARY KEY NOT NULL,
+	"passwordHash" text NOT NULL,
+	"salt" text NOT NULL,
+	"createdAt" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "Inquiry" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"name" varchar(120) NOT NULL,
+	"email" varchar(160) NOT NULL,
+	"phone" varchar(64),
+	"message" text NOT NULL,
+	"attachmentUrl" text
+);

@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { cookies } from "next/headers";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { adminUser } from "@/lib/db/schema";
 import { db } from "@/lib/db/client";
 
@@ -55,8 +55,7 @@ export function hashPassword(password: string, salt?: string) {
 }
 
 export async function ensureAdminUser() {
-  await db.execute(`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`);
-  await db.execute(`
+  await db.execute(sql`
     CREATE TABLE IF NOT EXISTS "AdminUser" (
       "username" varchar(64) PRIMARY KEY,
       "passwordHash" text NOT NULL,
@@ -68,11 +67,14 @@ export async function ensureAdminUser() {
   const existing = await db.select().from(adminUser).limit(1);
   if (existing.length === 0) {
     const { hash, salt } = hashPassword("admin");
-    await db.insert(adminUser).values({
-      username: "admin",
-      passwordHash: hash,
-      salt,
-    });
+    await db
+      .insert(adminUser)
+      .values({
+        username: "admin",
+        passwordHash: hash,
+        salt,
+      })
+      .onConflictDoNothing();
   }
 }
 

@@ -27,7 +27,7 @@ export function SiteHeader() {
           : "bg-transparent text-white"
       }`}
     >
-      <div className="mx-auto grid max-w-6xl grid-cols-3 items-center gap-4 py-3">
+      <div className="mx-auto grid max-w-6xl grid-cols-3 items-center gap-4 py-3 px-6">
         <Link
           href="/"
           className="flex items-center gap-3 text-lg font-semibold tracking-[0.18em]"
@@ -81,13 +81,13 @@ export function SiteHeader() {
         <div className="flex justify-end">
           <Link
             href="/ai"
-            className={`hidden rounded-full border px-5 py-2 text-sm font-medium uppercase tracking-[0.2em] transition md:inline-flex ${
+            className={`hidden rounded-full border px-5 py-2 text-sm font-semibold uppercase tracking-[0.2em] transition md:inline-flex ${
               scrolled
                 ? "border-black/15 bg-black text-white hover:-translate-y-0.5 hover:border-black/25"
                 : "border-amber-300/60 bg-white/5 text-amber-200 backdrop-blur hover:-translate-y-0.5 hover:border-amber-200 hover:text-white"
             }`}
           >
-            AI 정장 맞추기
+            정장 맞추기
           </Link>
         </div>
       </div>

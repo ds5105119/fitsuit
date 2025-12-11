@@ -1,18 +1,5 @@
+import Image from "next/image";
 import Link from "next/link";
-const highlights = [
-  {
-    title: "Signature Cuts",
-    description: "이탈리안 실루엣과 서울의 세련미를 결합한 맞춤 패턴.",
-  },
-  {
-    title: "Bespoke Craft",
-    description: "30년 장인의 핸드 스티칭과 풀 캔버스 공법을 고집합니다.",
-  },
-  {
-    title: "Private Lounge",
-    description: "샴페인과 함께하는 1:1 피팅, 나만의 룩을 설계하세요.",
-  },
-];
 
 const services = [
   "웨딩 & 포멀 수트",
@@ -34,64 +21,62 @@ export default function HomePage() {
         >
           <source src="/images/main-video.mp4" type="video/mp4" />
         </video>
-        
-        <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col px-6 pb-10 pt-28">
-          <div className="mt-auto grid gap-8 pb-16 pt-20 md:grid-cols-[1.25fr_1fr] md:items-end">
-            <div className="space-y-8">
-              <p className="text-sm uppercase tracking-[0.24em] text-amber-200/80">
-                Seoul Bespoke Atelier
-              </p>
-              <h1 className="font-[var(--font-playfair)] text-4xl font-light leading-tight tracking-wide text-white sm:text-5xl lg:text-6xl">
-                당신만을 위한
-                <br />
-                <span className="font-semibold text-amber-200">
-                  GOLD FINGER
-                </span>{" "}
-                테일러링
-              </h1>
-              <p className="max-w-2xl text-base leading-relaxed text-white/80 md:text-lg">
-                완벽한 실루엣, 손끝에서 빛나는 스티치, 시그니처 골드 라이닝까지.
-                첫 피팅부터 완성까지, 장인의 케어로 당신의 스타일을 완성합니다.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  href="/contact"
-                  className="rounded-full bg-amber-400 px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-black shadow-[0_15px_45px_rgba(255,193,7,0.35)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_55px_rgba(255,193,7,0.45)]"
-                >
-                  예약 상담 시작
-                </Link>
-                <a
-                  href="#story"
-                  className="rounded-full border border-white/30 bg-white/5 px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white transition hover:-translate-y-0.5 hover:border-amber-200 hover:text-amber-100"
-                >
-                  브랜드 스토리
-                </a>
-              </div>
-            </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              {highlights.map((item) => (
-                <div
-                  key={item.title}
-                  className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur transition hover:-translate-y-1 hover:border-amber-200/60 hover:bg-white/10"
-                >
-                  <p className="text-xs uppercase tracking-[0.25em] text-amber-200/80">
-                    {item.title}
-                  </p>
-                  <p className="mt-3 text-sm leading-relaxed text-white/80">
-                    {item.description}
-                  </p>
-                  <div className="mt-4 h-px w-12 bg-gradient-to-r from-amber-400/90 to-transparent opacity-0 transition group-hover:opacity-100" />
-                </div>
-              ))}
-            </div>
+        <div className="absolute h-full w-full bg-linear-to-b from-black/0 via-black/0 to-black"/>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-6 py-24 md:py-48">
+        <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-center">
+          <div className="space-y-5">
+              <p className="text-xs uppercase tracking-[0.24em] text-amber-200">
+                비전
+              </p>
+              <div className="h-px w-10 bg-amber-300" />
+            <p className="text-3xl font-[var(--font-playfair)] font-semibold leading-relaxed text-white sm:text-4xl">
+              가치를 아는,
+              <br />
+              가치있는 분을 위한,
+              <br />
+              가치있는 옷.
+            </p>
+            <p className="text-sm leading-relaxed text-white/70 sm:text-base">
+              비스포크 수트는 기성복이나 일반 맞춤(MTM)과는 차원이 다릅니다.
+              고객의 직업과 자세, 생활 습관, 그리고 취향까지 세밀하게 반영하여
+              전용 패턴을 새롭게 제작하며, 원단과 안감, 단추, 세부 디자인까지
+              모두 고객이 직접 선택할 수 있습니다. 그 결과 완성되는 수트는
+              세상에 단 하나뿐인, 오직 한 사람만을 위한 작품입니다.
+            </p>
           </div>
+          <div className="flex justify-center">
+            <Image
+              alt="Tailor stitching a bespoke suit"
+              src="/images/%E1%84%89%E1%85%B5%E1%84%8E%E1%85%B5%E1%86%B7%20%E1%84%89%E1%85%A1%E1%84%8C%E1%85%B5%E1%86%AB.avif"
+              width={640}
+              height={420}
+              className="h-auto w-full max-w-xl object-cover"
+              priority
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="w-full bg-white py-14 text-black">
+        <div className="mx-auto flex max-w-5xl flex-col gap-4 px-6">
+          <p className="text-xs uppercase tracking-[0.24em] text-amber-600">
+            서비스
+          </p>
+          <div className="h-px w-10 bg-black" />
+          <p className="text-3xl font-[var(--font-playfair)] font-semibold leading-relaxed sm:text-4xl">
+            &lsquo;가치&rsquo;를 찾는 여정,
+            <br />
+            대한민국 양복 명장이 도와드리겠습니다.
+          </p>
         </div>
       </section>
 
       <section
         id="atelier"
-        className="relative z-10 mx-auto mt-28 max-w-6xl rounded-[32px] border border-white/10 bg-gradient-to-br from-neutral-950 via-black to-amber-950/20 px-6 py-16 shadow-[0_25px_80px_rgba(0,0,0,0.5)] backdrop-blur"
+        className="relative z-10 mx-auto mt-28 max-w-6xl px-6 py-16"
       >
         <div className="grid gap-10 md:grid-cols-[1.2fr_1fr] md:items-center">
           <div className="space-y-4">
@@ -127,7 +112,7 @@ export default function HomePage() {
             ].map((detail) => (
               <div
                 key={detail}
-                className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-amber-950/[0.15] p-5 text-sm text-white/80 backdrop-blur"
+                className="p-5 text-sm text-white/80"
               >
                 {detail}
               </div>
@@ -140,7 +125,7 @@ export default function HomePage() {
         id="virtual"
         className="mx-auto mt-12 max-w-6xl px-6 sm:mt-20"
       >
-        <div className="grid gap-8 rounded-[28px] border border-white/10 bg-gradient-to-br from-neutral-950 via-black to-amber-950/25 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.45)] md:grid-cols-[1.2fr_1fr] md:items-center">
+        <div className="grid gap-8 md:grid-cols-[1.2fr_1fr] md:items-center">
           <div className="space-y-4">
             <p className="text-xs uppercase tracking-[0.24em] text-amber-200">
               Virtual Fit Preview
@@ -160,7 +145,7 @@ export default function HomePage() {
               ].map((item) => (
                 <div
                   key={item}
-                  className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/80 backdrop-blur"
+                  className="p-4 text-sm text-white/80"
                 >
                   {item}
                 </div>
@@ -168,43 +153,40 @@ export default function HomePage() {
             </div>
             <Link
               href="/ai"
-              className="inline-flex items-center gap-2 rounded-full border border-amber-200/60 bg-white/5 px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-amber-100 backdrop-blur transition hover:-translate-y-0.5 hover:border-amber-100"
+              className="inline-flex items-center gap-2 rounded-full border border-amber-200/60 px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-amber-100 transition hover:-translate-y-0.5 hover:border-amber-100"
             >
               AI 정장 맞추기
               <span aria-hidden>→</span>
             </Link>
           </div>
-          <div className="relative overflow-hidden rounded-[24px] border border-white/10 bg-black/40 p-6 backdrop-blur">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,215,128,0.18),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(255,193,7,0.15),transparent_25%)]" />
-            <div className="relative z-10 space-y-4">
-              <div className="flex gap-3">
-                <div className="h-16 w-16 rounded-lg border border-white/15 bg-white/5" />
-                <div className="flex-1 rounded-lg border border-white/15 bg-white/5 p-3">
-                  <div className="h-3 w-1/2 rounded-full bg-white/30" />
-                  <div className="mt-2 h-3 w-1/3 rounded-full bg-amber-300/60" />
-                </div>
+          <div className="space-y-4 rounded-[18px] bg-black/20 p-6">
+            <div className="flex gap-3">
+              <div className="h-16 w-16 rounded-lg bg-white/5" />
+              <div className="flex-1 rounded-lg bg-white/5 p-3">
+                <div className="h-3 w-1/2 rounded-full bg-white/30" />
+                <div className="mt-2 h-3 w-1/3 rounded-full bg-amber-300/60" />
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="text-xs uppercase tracking-[0.22em] text-white/60">
-                    Outfit Builder
-                  </span>
-                  <span className="rounded-full bg-amber-400 px-3 py-1 text-xs font-semibold text-black">
-                    Preview
-                  </span>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-3">
-                  {["셔츠", "재킷", "팬츠"].map((label) => (
-                    <div
-                      key={label}
-                      className="rounded-xl border border-white/10 bg-black/40 p-3 text-center text-sm text-white/80"
-                    >
-                      {label} 선택
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 h-40 rounded-xl border border-white/10 bg-gradient-to-b from-amber-100/20 via-transparent to-black" />
+            </div>
+            <div className="rounded-xl bg-white/5 p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-xs uppercase tracking-[0.22em] text-white/60">
+                  Outfit Builder
+                </span>
+                <span className="rounded-full bg-amber-400 px-3 py-1 text-xs font-semibold text-black">
+                  Preview
+                </span>
               </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {["셔츠", "재킷", "팬츠"].map((label) => (
+                  <div
+                    key={label}
+                    className="rounded-lg bg-black/40 p-3 text-center text-sm text-white/80"
+                  >
+                    {label} 선택
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 h-40 rounded-lg bg-gradient-to-b from-amber-100/20 via-transparent to-black" />
             </div>
           </div>
         </div>
@@ -249,22 +231,17 @@ export default function HomePage() {
           ].map((stage, idx) => (
             <div
               key={stage.title}
-              className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur transition hover:-translate-y-1 hover:border-amber-200/60"
+              className="space-y-3 p-2"
             >
-              <div className="absolute inset-0 opacity-0 transition group-hover:opacity-100">
-                <div className="h-full w-full bg-gradient-to-br from-amber-500/20 via-transparent to-white/5" />
-              </div>
-              <div className="relative z-10 space-y-3">
-                <span className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200/80">
-                  0{idx + 1}
-                </span>
-                <h4 className="text-xl font-semibold text-white">
-                  {stage.title}
-                </h4>
-                <p className="text-sm leading-relaxed text-white/70">
-                  {stage.copy}
-                </p>
-              </div>
+              <span className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200/80">
+                0{idx + 1}
+              </span>
+              <h4 className="text-xl font-semibold text-white">
+                {stage.title}
+              </h4>
+              <p className="text-sm leading-relaxed text-white/70">
+                {stage.copy}
+              </p>
             </div>
           ))}
         </div>
@@ -274,7 +251,7 @@ export default function HomePage() {
         id="story"
         className="mx-auto mb-20 max-w-6xl px-6 text-white/80 sm:mb-28"
       >
-        <div className="rounded-[32px] border border-white/10 bg-gradient-to-r from-black via-neutral-950 to-black p-10 shadow-[0_18px_60px_rgba(0,0,0,0.45)]">
+        <div className="p-6">
           <div className="grid gap-10 md:grid-cols-[1.2fr_1fr] md:items-center">
             <div className="space-y-4">
               <p className="text-xs uppercase tracking-[0.24em] text-amber-200">
@@ -297,23 +274,20 @@ export default function HomePage() {
                 </span>
               </div>
             </div>
-            <div className="relative overflow-hidden rounded-3xl border border-amber-200/30 bg-amber-50/5 p-8 text-center">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,215,128,0.18),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(255,193,7,0.15),transparent_25%)]" />
-              <div className="relative z-10 space-y-4">
-                <p className="text-sm uppercase tracking-[0.28em] text-amber-200">
-                  Concierge
-                </p>
-                <p className="text-lg leading-relaxed text-white/90">
-                  프라이빗 라운지 예약, 출장 피팅, 원단 큐레이션까지
-                  테일러가 직접 동행합니다.
-                </p>
-                <Link
-                  href="/contact"
-                  className="inline-flex items-center justify-center rounded-full bg-amber-400 px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-black transition hover:-translate-y-0.5"
-                >
-                  컨시어지에게 문의
-                </Link>
-              </div>
+            <div className="space-y-4 p-4 text-center">
+              <p className="text-sm uppercase tracking-[0.28em] text-amber-200">
+                Concierge
+              </p>
+              <p className="text-lg leading-relaxed text-white/90">
+                프라이빗 라운지 예약, 출장 피팅, 원단 큐레이션까지 테일러가 직접
+                동행합니다.
+              </p>
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center rounded-full bg-amber-400 px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-black transition hover:-translate-y-0.5"
+              >
+                컨시어지에게 문의
+              </Link>
             </div>
           </div>
         </div>
