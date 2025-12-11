@@ -16,64 +16,32 @@ export function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const linkBase =
-    "text-sm uppercase tracking-[0.22em] transition-colors hidden md:inline";
+  const linkBase = "text-sm uppercase tracking-[0.22em] transition-colors hidden md:inline";
 
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "bg-white/95 text-black shadow-[0_20px_80px_rgba(0,0,0,0.2)] backdrop-blur-md"
-          : "bg-transparent text-white"
+        scrolled ? "bg-white/95 text-black shadow-[0_20px_80px_rgba(0,0,0,0.2)] backdrop-blur-md" : "bg-transparent text-white"
       }`}
     >
-      <div className="mx-auto grid max-w-6xl grid-cols-3 items-center gap-4 py-3 px-6">
-        <Link
-          href="/"
-          className="flex items-center gap-3 text-lg font-semibold tracking-[0.18em]"
-        >
+      <div className="mx-auto grid max-w-6xl grid-cols-3 items-center gap-4 h-16 px-6">
+        <Link href="/" className="flex items-center gap-3 text-lg font-semibold tracking-[0.18em]">
           <div className="relative h-12 aspect-524/132 overflow-hidden">
-            <Image
-              alt="Gold Finger"
-              src="/images/logo.png"
-              fill
-              className="object-cover"
-              priority
-            />
+            <Image alt="Gold Finger" src="/images/logo.png" fill className="object-cover" priority />
           </div>
         </Link>
 
         <nav className="flex items-center justify-center gap-6">
-          <a
-            className={`${linkBase} ${
-              scrolled ? "text-black hover:text-amber-700" : "text-white hover:text-amber-200"
-            }`}
-            href="#atelier"
-          >
+          <a className={`${linkBase} ${scrolled ? "text-black hover:text-amber-700" : "text-white hover:text-amber-200"}`} href="#atelier">
             Atelier
           </a>
-          <a
-            className={`${linkBase} ${
-              scrolled ? "text-black hover:text-amber-700" : "text-white hover:text-amber-200"
-            }`}
-            href="#services"
-          >
+          <a className={`${linkBase} ${scrolled ? "text-black hover:text-amber-700" : "text-white hover:text-amber-200"}`} href="#services">
             Services
           </a>
-          <a
-            className={`${linkBase} ${
-              scrolled ? "text-black hover:text-amber-700" : "text-white hover:text-amber-200"
-            }`}
-            href="#story"
-          >
+          <a className={`${linkBase} ${scrolled ? "text-black hover:text-amber-700" : "text-white hover:text-amber-200"}`} href="#story">
             Heritage
           </a>
-          <Link
-            className={`${linkBase} ${
-              scrolled ? "text-black hover:text-amber-700" : "text-white hover:text-amber-200"
-            }`}
-            href="/contact"
-          >
+          <Link className={`${linkBase} ${scrolled ? "text-black hover:text-amber-700" : "text-white hover:text-amber-200"}`} href="/contact">
             Contact
           </Link>
         </nav>
