@@ -29,14 +29,8 @@ export function SiteHeader() {
         scrolled ? "bg-white/95 text-black shadow-[0_20px_80px_rgba(0,0,0,0.1)] backdrop-blur-md" : "bg-transparent text-white"
       }`}
     >
-      <div className="mx-auto grid max-w-6xl grid-cols-3 items-center gap-4 h-16 px-6">
-        <Link href="/" className="flex items-center gap-3 text-lg font-semibold tracking-[0.18em]">
-          <div className="relative h-12 aspect-524/132 overflow-hidden">
-            <Image alt="Gold Finger" src="/images/logo.png" fill className="object-cover" priority />
-          </div>
-        </Link>
-
-        <nav className="flex items-center justify-center gap-6">
+      <div className="mx-auto grid grid-cols-3 items-center gap-4 h-16 px-6">
+        <nav className="flex items-center gap-6">
           <a className={`${linkBase} ${scrolled ? "text-black hover:text-amber-700" : "text-white hover:text-amber-200"}`} href="#atelier">
             Atelier
           </a>
@@ -50,6 +44,12 @@ export function SiteHeader() {
             Contact
           </Link>
         </nav>
+
+        <Link href="/" className="flex items-center justify-center gap-3 text-lg font-semibold tracking-[0.18em]">
+          <div className="relative h-12 aspect-346/107 overflow-hidden">
+            <Image alt="Gold Finger" src="/images/logo.png" fill className="object-cover" priority />
+          </div>
+        </Link>
 
         <div className="flex justify-end">
           <Link
