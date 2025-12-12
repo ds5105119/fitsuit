@@ -8,12 +8,17 @@ export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 40);
+    const update = () => {
+      const canScroll = document.documentElement.scrollHeight - window.innerHeight > 8;
+      setScrolled(!canScroll || window.scrollY > 40);
     };
-    onScroll();
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    update();
+    window.addEventListener("scroll", update);
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
   }, []);
 
   const linkBase = "text-sm uppercase tracking-[0.22em] transition-colors hidden md:inline";
@@ -21,7 +26,7 @@ export function SiteHeader() {
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-        scrolled ? "bg-white/95 text-black shadow-[0_20px_80px_rgba(0,0,0,0.2)] backdrop-blur-md" : "bg-transparent text-white"
+        scrolled ? "bg-white/95 text-black shadow-[0_20px_80px_rgba(0,0,0,0.1)] backdrop-blur-md" : "bg-transparent text-white"
       }`}
     >
       <div className="mx-auto grid max-w-6xl grid-cols-3 items-center gap-4 h-16 px-6">

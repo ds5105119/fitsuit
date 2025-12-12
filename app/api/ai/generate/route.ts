@@ -10,22 +10,84 @@ export async function POST(req: Request) {
 
   try {
     const { selections, userImage } = await req.json();
-    const summary = Object.values(selections || {})
-      .map((s: any) => `${s.title}: ${s.subtitle}`)
+    const summary = (selections || [])
+      .map((s: any) => {
+        const cat = s.category ? String(s.category) : "Selection";
+        const group = s.group ? ` / ${s.group}` : "";
+        return `${cat}${group}: ${s.title} - ${s.subtitle}`;
+      })
       .join(", ");
 
+    console.log(summary);
+
     const prompt = `
-    You are an image editor. Use the first inline image as the base person photo.
+You are an image editor and stylist.
 
-    - Completely remove and ignore ALL original background, borders, and padding from the input image (including any white bars or padding added to fit an aspect ratio). Only keep the person.
-    - Keep the person's face, body, and pose exactly as in the reference (no changes to expression, hairstyle, body shape, or limb position).
-    - Dress them in a tailored suit based on: ${summary}.
-    - Shirt: crisp white. Tie: dark charcoal or navy. Suit: deep charcoal with subtle texture, with realistic fabric and folds aligned naturally to the body.
-    - Rebuild the background from scratch as a flat, solid color #f5f5f5 that fills the entire canvas edge-to-edge.
-    - There must be **no remaining white padding, borders, original background, gradients, shadows, glows, or transparent pixels.** Every pixel that is not part of the person must be exactly #f5f5f5.
-    - If the input contains any white or blank areas around the person (from resizing or padding), treat them as background and overwrite them completely with #f5f5f5.
+STEP 1 — Read style summary (HARD CONSTRAINTS)
+- Carefully read this suit style description:
+${summary}
+- Treat every explicit detail in ${summary} as a HARD CONSTRAINT, not a suggestion.
+- This includes, but is not limited to:
+  - Number of buttons on the jacket (1, 2, 2.5, 4, 6, etc.)
+  - Closure type (single-breasted or double-breasted)
+  - Lapel style (notch, peak, shawl, etc.)
+  - Suit color (e.g. charcoal, navy, black, grey, brown)
+  - Pattern (e.g. solid, pinstripe, chalk stripe, windowpane, glen check, herringbone, houndstooth)
+- If there is ANY conflict between ${summary} and any other instruction, ALWAYS follow ${summary} first.
 
-    Output a realistic photo-style render, with the suit aligned precisely to the body and all proportions kept natural.`;
+STEP 2 — Remove original background COMPLETELY
+- Use the first inline image ONLY as the base person photo.
+- Isolate ONLY the person (face, body, hair, hands, legs). Treat everything else as background.
+- Completely remove ALL original background, scenery, floor, walls, studio backdrops, furniture, sky, room, borders, or padding.
+- This includes ANY white or black bars, padding, letterboxing, empty space, text, logos, or graphics.
+- Do NOT preserve, reuse, blend, or copy ANY part of the original background or original canvas.
+
+STEP 3 — Preserve the person exactly
+- Keep the person’s face, body, proportions, and pose exactly as in the reference.
+- Do NOT change the facial expression, hairstyle, body shape, or limb position.
+- Only change the clothing according to the suit instructions.
+
+STEP 4 — Dress them in the suit (FOLLOW HARD CONSTRAINTS)
+- Dress the person in a tailored suit that matches ${summary} as closely as possible in:
+  - design and silhouette,
+  - lapel shape,
+  - closure type,
+  - and especially the EXACT number and arrangement of buttons.
+- Shirt: crisp white.
+- Tie: dark charcoal or navy, unless ${summary} explicitly requires a different tie style or color.
+- Suit: deep charcoal with subtle texture, unless ${summary} explicitly specifies a different color or pattern. Fabric must look realistic, with natural folds aligned to the body.
+
+STEP 5 — Create a NEW background from scratch
+- Create a NEW empty canvas behind the person.
+- Fill the ENTIRE background with a flat, solid color #f5f5f5 from edge to edge.
+- The final background must be EXACTLY #f5f5f5 everywhere and nothing else:
+  no white (#ffffff), no black, no gradients, no textures, no shadows, no glows, no vignettes, no patterns, and no transparent pixels.
+- Any area that is not part of the person or clothing MUST be pure #f5f5f5.
+- Do not keep any of the original background, padding, or borders, even partially.
+
+STEP 6 — SELF-CHECK (VERY IMPORTANT)
+Before finalizing the image, mentally go through this checklist:
+
+1) BUTTON COUNT & CLOSURE
+   - Does the jacket have the EXACT number of buttons specified in ${summary}?
+   - Is the jacket correctly single-breasted or double-breasted as specified?
+   - If ${summary} says 1-button, 2-button, 2.5-button, 4-button DB, 6-button DB, etc.,
+     the front of the jacket MUST clearly show that exact configuration.
+
+2) COLOR & PATTERN
+   - Is the suit color (e.g. charcoal, navy, grey, black, brown) matching ${summary}?
+   - Is the pattern (solid, pinstripe, chalk stripe, windowpane, glen check, herringbone, houndstooth, etc.)
+     exactly as described in ${summary}, with the correct density and direction?
+
+3) BACKGROUND
+   - Is every background pixel exactly #f5f5f5 with NO leftover scenery, floor, wall, or padding?
+
+If any of these checks fail, correct the image so that it strictly satisfies ${summary} and all constraints above.
+
+FINAL OUTPUT
+- Output a realistic photo-style render.
+- The suit must be aligned precisely to the body with natural proportions.
+- The suit design must clearly and exactly reflect the constraints in ${summary}, especially button count, closure type, color, and pattern.`;
 
     const ai = new GoogleGenAI({ apiKey });
     const contents: ContentListUnion = [];
