@@ -644,7 +644,7 @@ export function AIConfigurator() {
   return (
     <section className="flex flex-col xl:flex-row h-full w-full relative">
       <div className="relative h-full flex flex-col gap-6">
-        <div className="relative h-full grow xl:aspect-square 2xl:aspect-4/3 overflow-hidden">
+        <div className="relative h-full xl:aspect-square 2xl:aspect-4/3 overflow-hidden">
           {previewUrl ? (
             <NextImage alt="맞춤 자켓 프리뷰" src={previewUrl} fill className="object-contain" priority />
           ) : (
@@ -718,7 +718,7 @@ export function AIConfigurator() {
           })()}
 
           {activeTab === "사진 업로드" && (
-            <div className="w-full grow flex flex-col gap-3">
+            <div className="w-full mt-auto flex flex-col gap-3">
               <div className="relative hidden xl:block w-full h-full overflow-hidden">
                 {originalUpload ? (
                   <div className="relative h-full overflow-hidden">
