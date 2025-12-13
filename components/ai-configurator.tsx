@@ -761,26 +761,22 @@ export function AIConfigurator() {
           })()}
 
           {activeTab === "사진 업로드" && (
-            <div className="w-full mt-auto flex flex-col gap-3">
+            <div className="xl:grow w-full flex flex-col gap-3">
               <div className="relative hidden xl:block w-full h-full overflow-hidden">
-                {originalUpload ? (
-                  <div className="relative h-full overflow-hidden">
-                    {originalUpload ? (
-                      <NextImage alt="업로드한 전신 사진" src={originalUpload} fill className="object-contain" />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-xs text-neutral-500">전신 사진을 업로드하세요.</div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex h-full items-center justify-center text-sm text-neutral-500">전신 사진을 업로드하면 바로 프리뷰를 볼 수 있습니다.</div>
-                )}
+                <div className="relative h-full overflow-hidden">
+                  {originalUpload ? (
+                    <NextImage alt="업로드한 전신 사진" src={originalUpload} fill className="object-contain" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-sm text-neutral-500">전신 사진을 업로드하면 바로 프리뷰를 볼 수 있습니다.</div>
+                  )}
+                </div>
               </div>
 
               <input id="user-image-input" type="file" accept="image/*" onChange={handleUpload} className="hidden" />
 
               <label
                 htmlFor="user-image-input"
-                className="flex shrink-0 items-center justify-center w-full h-16 xl:h-20 bg-neutral-900 text-white font-medium cursor-pointer hover:bg-neutral-800 transition-colors"
+                className="mt-auto flex shrink-0 items-center justify-center w-full h-16 xl:h-20 bg-neutral-900 text-white font-medium cursor-pointer hover:bg-neutral-800 transition-colors"
               >
                 전신 사진 업로드하기
               </label>
@@ -803,7 +799,7 @@ export function AIConfigurator() {
                           <button
                             key={group}
                             onClick={() => setActiveGroup((prev) => ({ ...prev, [cat]: group }))}
-                            className="flex w-full items-center text-left gap-4 p-2 rounded-md group"
+                            className="flex w-full items-center text-left gap-4 p-3 rounded-md group"
                           >
                             {current?.image && (
                               <div className="relative h-32 w-32 overflow-hidden rounded-sm">
@@ -852,9 +848,10 @@ export function AIConfigurator() {
                                     handleSelect(cat, groupKey, option);
                                   }
                                 }}
-                                className={`flex w-full items-center text-left gap-4 p-2 rounded-md group ${
-                                  isActive ? "shadow-[0_0_0_4px_rgba(0,0,0,0.2)]" : ""
-                                }`}
+                                className={cn(
+                                  "flex w-full items-center text-left gap-4 p-3 rounded-md group",
+                                  isActive && "-shadow-[0_0_0_4px_rgba(0,0,0,0.2)] bg-black/10"
+                                )}
                               >
                                 {option.image && (
                                   <div className="relative h-32 w-32 overflow-hidden rounded-sm">

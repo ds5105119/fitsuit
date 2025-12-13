@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { LenisProvider } from "@/components/lenis-provider";
 import Link from "next/link";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 export default function HomePage() {
   const [cardHovered, setCardHovered] = useState<number | null>(null);
@@ -83,7 +84,7 @@ export default function HomePage() {
               대한민국 양복 명장이 도와드리겠습니다.
             </p>
 
-            <div className="w-full grid grid-cols-3 gap-12 pt-20 px-6" onMouseLeave={() => setCardHovered(null)}>
+            <div className="w-full grid-cols-3 gap-12 pt-20 px-6 hidden lg:grid" onMouseLeave={() => setCardHovered(null)}>
               {cardItems.map((item, idx) => (
                 <div
                   key={item.src}
@@ -104,8 +105,22 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="max-w-3xl mx-auto text-lg pt-20 flex flex-col items-center">
-              <p>
+            <Carousel className="lg:hidden pt-12">
+              <CarouselContent>
+                {cardItems.map((item, idx) => (
+                  <CarouselItem key={idx}>
+                    <div className="relative aspect-3/4 w-full overflow-hidden">
+                      <Image alt={item.alt} src={item.src} fill priority className="object-cover" />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious variant="ghost" className="left-2 text-white top-1/2 -translate-y-1/2" />
+              <CarouselNext variant="ghost" className="right-2 text-white top-1/2 -translate-y-1/2" />
+            </Carousel>
+
+            <div className="max-w-3xl mx-auto text-lg pt-12 lg:pt-20 flex flex-col items-center">
+              <p className="text-sm lg:text-base">
                 당신만을 위한 여정은 마스터 테일러와의 창의적인 대화에서 시작됩니다. 희소한 고급 원단들 중에서 상상할 수 있는 모든 생동감 있는 색상과 패턴을
                 함께 선택하며, 당신이 그리는 이상적인 모습을 하나씩 구체화해 나갑니다. 예상치 못한 안감, 호화로운 단추, 그리고 완성도를 높여 주는 각종 마감
                 디테일까지 — 모든 요소가 당신의 꿈을 실현하기 위한 하나의 과정으로 세심하게 고려됩니다. 비스포크 경험 전반에 걸쳐 마스터 테일러는 오랜 시간
@@ -129,23 +144,23 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-6">
-            <div className="order-2 md:order-1 md:col-span-1">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-6">
+            <div className="order-2 lg:order-1 lg:col-span-1">
               <div className="relative aspect-square w-full overflow-hidden">
                 <Image alt="원단" src="/images/fabric1.png" fill priority className="object-cover" />
               </div>
 
-              <div className="pt-4 text-xs md:text-sm">
+              <div className="pt-4 text-xs lg:text-sm">
                 <p className="font-bold">Super 180's</p>
                 <p>PIACENZA 1733</p>
               </div>
             </div>
-            <div className="order-1 md:order-2 md:col-span-2">
+            <div className="order-1 lg:order-2 lg:col-span-2">
               <div className="relative aspect-3/4 w-full overflow-hidden bg-gray-100">
                 <Image alt="모델" src="/images/suit1.png" fill priority className="object-cover" />
               </div>
 
-              <div className="pt-4 text-xs md:text-sm">
+              <div className="pt-4 text-xs lg:text-sm">
                 <p className="font-bold">스트라입 슈트</p>
                 <p>네이비 핀</p>
               </div>
