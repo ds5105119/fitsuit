@@ -86,8 +86,8 @@ export function SiteHeader() {
           </SheetContent>
         </Sheet>
 
-        <Link href="/" className="flex items-center justify-center gap-3 text-lg font-semibold tracking-[0.18em]">
-          <div className="relative h-10 aspect-346/107 overflow-hidden">
+        <Link href="/" className="shrink-0 flex items-center justify-center gap-3 text-lg font-semibold tracking-[0.18em]">
+          <div className="relative h-8 md:h-10 aspect-346/107 overflow-hidden">
             <Image alt="Gold Finger" src="/images/logo-1.png" fill className="object-cover" priority />
           </div>
         </Link>
