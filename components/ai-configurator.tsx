@@ -709,7 +709,7 @@ export function AIConfigurator() {
       </div>
 
       <div className="relative flex flex-col xl:grow min-w-0 bg-white">
-        <div className="relative flex flex-col h-[calc(100%-4.5rem)] xl:h-[calc(100%-5rem)] items-center">
+        <div className="relative flex flex-col h-[calc(100%-4rem)] xl:h-[calc(100%-5rem)] items-center">
           {(() => {
             const cat = activeTab as WearCategory;
             const groups = getGroups(cat);
@@ -718,7 +718,7 @@ export function AIConfigurator() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setActiveGroup((prev) => ({ ...prev, [cat]: null }))}
-                  className="h-20 font-semibold text-neutral-600 hover:text-neutral-900"
+                  className="h-16 xl:h-20 font-semibold text-neutral-600 hover:text-neutral-900"
                 >
                   ← 목록으로
                 </button>
@@ -727,7 +727,7 @@ export function AIConfigurator() {
             ) : (
               <div
                 ref={tabScrollRef}
-                className="px-4 xl:px-6 h-18 xl:h-20 items-center w-full flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide"
+                className="px-4 xl:px-6 h-16 xl:h-20 items-center w-full flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide"
                 onMouseDown={(e) => {
                   isDraggingRef.current = true;
                   dragPosRef.current = { x: e.clientX, scroll: tabScrollRef.current?.scrollLeft ?? 0 };
@@ -796,7 +796,7 @@ export function AIConfigurator() {
 
                 if (hasGroups && !activeGroup[cat]) {
                   return (
-                    <div className="flex flex-col w-full h-40 xl:h-[calc(100%-5rem)] px-6 gap-3 overflow-y-auto pt-2 pb-6">
+                    <div className="flex flex-col w-full h-36 xl:h-[calc(100%-5rem)] px-6 gap-3 overflow-y-auto pt-2 pb-6">
                       {groups.map((group) => {
                         const current = getSelectedOption(cat, group);
                         return (
@@ -823,7 +823,7 @@ export function AIConfigurator() {
                 }
 
                 return (
-                  <div className="flex flex-col w-full h-40 xl:h-[calc(100%-5rem)]">
+                  <div className="flex flex-col w-full h-36 xl:h-[calc(100%-5rem)]">
                     <div className="flex flex-col w-full px-6 gap-3 overflow-y-auto pt-2 pb-6">
                       {catalog[cat]
                         .filter((option) => {
@@ -880,7 +880,7 @@ export function AIConfigurator() {
 
         <div className="flex items-center w-full">
           <button
-            className={`flex items-center justify-center w-1/2 h-18 xl:h-20 text-black transition ${
+            className={`flex items-center justify-center w-1/2 h-16 xl:h-20 text-black transition ${
               loading ? "bg-neutral-200 cursor-not-allowed opacity-70" : "bg-neutral-300 hover:bg-neutral-400"
             }`}
             onClick={generatePreview}
@@ -890,7 +890,7 @@ export function AIConfigurator() {
             AI 합성
           </button>
           <button
-            className={`flex items-center justify-center w-1/2 h-18 xl:h-20 text-white transition ${
+            className={`flex items-center justify-center w-1/2 h-16 xl:h-20 text-white transition ${
               loading ? "bg-neutral-600 cursor-not-allowed opacity-70" : "bg-neutral-700 hover:bg-neutral-800"
             }`}
             onClick={generatePreview}
