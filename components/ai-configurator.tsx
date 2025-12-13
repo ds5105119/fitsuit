@@ -643,7 +643,7 @@ export function AIConfigurator() {
 
   return (
     <section className="flex flex-col xl:flex-row h-full w-full relative">
-      <div className="relative h-full flex flex-col gap-6">
+      <div className="relative h-full">
         <div className="relative h-full xl:aspect-square 2xl:aspect-4/3 overflow-hidden">
           {previewUrl ? (
             <NextImage alt="맞춤 자켓 프리뷰" src={previewUrl} fill className="object-contain" priority />
@@ -663,10 +663,53 @@ export function AIConfigurator() {
             </div>
           )}
         </div>
+
+        <div className="absolute left-4 bottom-4 z-20 flex flex-col-reverse items-start gap-3">
+          <button
+            type="button"
+            onClick={() => setPresetOpen((open) => !open)}
+            className="flex items-center gap-2 rounded-full bg-neutral-900 w-18 justify-center py-2 text-white shadow-lg hover:bg-neutral-800 transition"
+          >
+            <span className="text-sm font-semibold">프리셋</span>
+          </button>
+
+          <AnimatePresence>
+            {presetOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 12 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-2"
+              >
+                {presets.map((preset, idx) => {
+                  const isActive = idx === activePreset;
+                  return (
+                    <motion.button
+                      type="button"
+                      key={preset.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: 0.2, delay: idx * 0.03 }}
+                      onClick={() => handleApplyPreset(idx)}
+                      className={cn(
+                        "flex items-center gap-2 rounded-full w-18 justify-center text-sm py-2 backdrop-blur duration-300 transform-color",
+                        isActive ? "bg-neutral-300 text-neutral-900" : "bg-white/95 text-neutral-900"
+                      )}
+                    >
+                      {preset.name}
+                    </motion.button>
+                  );
+                })}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
-      <div className="relative flex flex-col grow min-w-0 bg-white">
-        <div className="relative flex flex-col h-[calc(100%-5rem)] items-center">
+      <div className="relative flex flex-col xl:grow min-w-0 bg-white">
+        <div className="relative flex flex-col h-[calc(100%-4.5rem)] xl:h-[calc(100%-5rem)] items-center">
           {(() => {
             const cat = activeTab as WearCategory;
             const groups = getGroups(cat);
@@ -737,7 +780,7 @@ export function AIConfigurator() {
 
               <label
                 htmlFor="user-image-input"
-                className="flex shrink-0 items-center justify-center w-full h-20 bg-neutral-900 text-white text-sm md:text-base font-medium cursor-pointer hover:bg-neutral-800 transition-colors"
+                className="flex shrink-0 items-center justify-center w-full h-18 xl:h-20 bg-neutral-900 text-white text-sm md:text-base font-medium cursor-pointer hover:bg-neutral-800 transition-colors"
               >
                 전신 사진 업로드하기
               </label>
@@ -753,7 +796,7 @@ export function AIConfigurator() {
 
                 if (hasGroups && !activeGroup[cat]) {
                   return (
-                    <div className="flex flex-col w-full h-[180px] xl:h-[calc(100%-5rem)] px-6 gap-3 overflow-y-auto pt-2 pb-6">
+                    <div className="flex flex-col w-full h-40 xl:h-[calc(100%-5rem)] px-6 gap-3 overflow-y-auto pt-2 pb-6">
                       {groups.map((group) => {
                         const current = getSelectedOption(cat, group);
                         return (
@@ -780,7 +823,7 @@ export function AIConfigurator() {
                 }
 
                 return (
-                  <div className="flex flex-col w-full h-[180px] xl:h-[calc(100%-5rem)]">
+                  <div className="flex flex-col w-full h-40 xl:h-[calc(100%-5rem)]">
                     <div className="flex flex-col w-full px-6 gap-3 overflow-y-auto pt-2 pb-6">
                       {catalog[cat]
                         .filter((option) => {
@@ -837,7 +880,7 @@ export function AIConfigurator() {
 
         <div className="flex items-center w-full">
           <button
-            className={`flex items-center justify-center w-1/2 h-20 text-black transition ${
+            className={`flex items-center justify-center w-1/2 h-18 xl:h-20 text-black transition ${
               loading ? "bg-neutral-200 cursor-not-allowed opacity-70" : "bg-neutral-300 hover:bg-neutral-400"
             }`}
             onClick={generatePreview}
@@ -847,7 +890,7 @@ export function AIConfigurator() {
             AI 합성
           </button>
           <button
-            className={`flex items-center justify-center w-1/2 h-20 text-white transition ${
+            className={`flex items-center justify-center w-1/2 h-18 xl:h-20 text-white transition ${
               loading ? "bg-neutral-600 cursor-not-allowed opacity-70" : "bg-neutral-700 hover:bg-neutral-800"
             }`}
             onClick={generatePreview}
@@ -856,49 +899,6 @@ export function AIConfigurator() {
           </button>
         </div>
         {error && <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
-      </div>
-
-      <div className="absolute left-4 bottom-4 z-20 flex flex-col-reverse items-start gap-3">
-        <button
-          type="button"
-          onClick={() => setPresetOpen((open) => !open)}
-          className="flex items-center gap-2 rounded-full bg-neutral-900 w-18 justify-center py-2 text-white shadow-lg hover:bg-neutral-800 transition"
-        >
-          <span className="text-sm font-semibold">프리셋</span>
-        </button>
-
-        <AnimatePresence>
-          {presetOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 12 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-2"
-            >
-              {presets.map((preset, idx) => {
-                const isActive = idx === activePreset;
-                return (
-                  <motion.button
-                    type="button"
-                    key={preset.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    transition={{ duration: 0.2, delay: idx * 0.03 }}
-                    onClick={() => handleApplyPreset(idx)}
-                    className={cn(
-                      "flex items-center gap-2 rounded-full w-18 justify-center text-sm py-2 backdrop-blur duration-300 transform-color",
-                      isActive ? "bg-neutral-300 text-neutral-900" : "bg-white/95 text-neutral-900"
-                    )}
-                  >
-                    {preset.name}
-                  </motion.button>
-                );
-              })}
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </section>
   );
