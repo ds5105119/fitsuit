@@ -780,7 +780,7 @@ export function AIConfigurator() {
 
               <label
                 htmlFor="user-image-input"
-                className="flex shrink-0 items-center justify-center w-full h-18 xl:h-20 bg-neutral-900 text-white font-medium cursor-pointer hover:bg-neutral-800 transition-colors"
+                className="flex shrink-0 items-center justify-center w-full h-16 xl:h-20 bg-neutral-900 text-white font-medium cursor-pointer hover:bg-neutral-800 transition-colors"
               >
                 전신 사진 업로드하기
               </label>
