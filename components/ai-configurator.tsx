@@ -727,7 +727,7 @@ export function AIConfigurator() {
             ) : (
               <div
                 ref={tabScrollRef}
-                className="px-6 h-20 items-center w-full flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide"
+                className="px-4 xl:px-6 h-18 xl:h-20 items-center w-full flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide"
                 onMouseDown={(e) => {
                   isDraggingRef.current = true;
                   dragPosRef.current = { x: e.clientX, scroll: tabScrollRef.current?.scrollLeft ?? 0 };
@@ -749,7 +749,7 @@ export function AIConfigurator() {
                     key={tab}
                     onClick={() => setActiveTab(tab)}
                     className={cn(
-                      "rounded-full px-4 py-2 font-medium transition select-none",
+                      "rounded-full px-4 py-2 font-medium text-sm xl:text-base transition select-none",
                       activeTab === tab ? "border-black bg-black text-white shadow-[0_10px_30px_-18px_rgba(0,0,0,0.6)]" : ""
                     )}
                   >
