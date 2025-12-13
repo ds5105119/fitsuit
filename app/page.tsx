@@ -5,6 +5,7 @@ import { ZapIcon } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { LenisProvider } from "@/components/lenis-provider";
+import Link from "next/link";
 
 export default function HomePage() {
   const [cardHovered, setCardHovered] = useState<number | null>(null);
@@ -103,13 +104,14 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="max-w-3xl mx-auto text-lg font-semibold pt-20 flex flex-col items-center">
+            <div className="max-w-3xl mx-auto text-lg pt-20 flex flex-col items-center">
               <p>
-                Your unique experience begins with a creative conversation with our Master Tailor, who will bring your vision to life using a selection of rare
-                fabrics woven in every imaginable vibrant colour and pattern. Unexpected linings, luxurious buttons and other finishing touches are all
-                considered as a part of the realisation of your dream. Throughout the Bespoke experience our Master Tailor will handcraft your masterpiece in a
-                ritual of time-honoured techniques, whether it’s unique casual pieces, knitwear, outerwear, leather goods, accessories or tailored suiting. The
-                resulting designs can’t be found anywhere else in the world, with no limits on fabrics, construction or detailing.
+                당신만을 위한 여정은 마스터 테일러와의 창의적인 대화에서 시작됩니다. 희소한 고급 원단들 중에서 상상할 수 있는 모든 생동감 있는 색상과 패턴을
+                함께 선택하며, 당신이 그리는 이상적인 모습을 하나씩 구체화해 나갑니다. 예상치 못한 안감, 호화로운 단추, 그리고 완성도를 높여 주는 각종 마감
+                디테일까지 — 모든 요소가 당신의 꿈을 실현하기 위한 하나의 과정으로 세심하게 고려됩니다. 비스포크 경험 전반에 걸쳐 마스터 테일러는 오랜 시간
+                이어져 온 전통적인 수제 기법으로 당신만의 작품을 빚어냅니다. 이는 개성 있는 캐주얼 웨어, 니트웨어, 아우터, 가죽 제품, 액세서리, 혹은 테일러드
+                수트까지 어떤 아이템이든 마찬가지입니다. 이렇게 탄생한 디자인들은 전 세계 어디에서도 찾아볼 수 없는, 오직 당신만을 위한 단 하나의 결과물입니다.
+                사용되는 원단, 구성 방식, 디테일에 어떠한 제한도 없습니다.
               </p>
 
               <div className="flex flex-col space-y-4 pt-24 items-center">
@@ -117,8 +119,10 @@ export default function HomePage() {
                   <Button>더 알아보기</Button>
                 </div>
                 <div>
-                  <Button variant="outline" className="px-5">
-                    <ZapIcon className="text-blue-500" /> AI 슈트 디자인 시작하기
+                  <Button variant="outline" className="px-5" asChild>
+                    <Link href="/ai">
+                      <ZapIcon className="text-blue-500" /> AI 슈트 디자인 시작하기
+                    </Link>
                   </Button>
                 </div>
               </div>

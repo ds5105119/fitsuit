@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import NextImage from "next/image";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 
@@ -407,6 +409,8 @@ const findOptionById = (cat: WearCategory, id: string) => catalog[cat].find((opt
 export function AIConfigurator() {
   const [activeTab, setActiveTab] = useState<CategoryKey>("사진 업로드");
   const [activeGroup, setActiveGroup] = useState<Partial<Record<WearCategory, string | null>>>({});
+  const [presetOpen, setPresetOpen] = useState(false);
+  const [activePreset, setActivePreset] = useState(0);
 
   const buildInitialSelections = (): SelectionState => {
     const state = {} as SelectionState;
@@ -434,14 +438,28 @@ export function AIConfigurator() {
   };
 
   const [selected, setSelected] = useState<SelectionState>(buildInitialSelections);
+  const cloneSelections = (input: SelectionState) => JSON.parse(JSON.stringify(input)) as SelectionState;
+  const [presets, setPresets] = useState(() =>
+    Array.from({ length: 3 }).map((_, idx) => ({
+      id: idx,
+      name: `프리셋 ${idx + 1}`,
+      selections: cloneSelections(buildInitialSelections()),
+      previewUrl: "",
+    }))
+  );
   const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [previewOwner, setPreviewOwner] = useState(0);
   const [userImage, setUserImage] = useState<string | null>(null);
+  const [originalUpload, setOriginalUpload] = useState<string | null>(null);
+  const [backgroundPreview, setBackgroundPreview] = useState<string | null>(null);
   const [uploadProcessing, setUploadProcessing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const tabScrollRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
   const dragPosRef = useRef<{ x: number; scroll: number }>({ x: 0, scroll: 0 });
+  const applyingPresetRef = useRef(false);
+  const skipSaveRef = useRef(false);
 
   const handleSelect = (category: WearCategory, groupKey: string, option: ConfigOption) => {
     setSelected((prev) => ({
@@ -481,20 +499,50 @@ export function AIConfigurator() {
     return selected[category]?.[key];
   };
 
+  const requestBackgroundRemoval = async (imageDataUrl: string) => {
+    const res = await fetch("/api/ai/remove-background", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userImage: imageDataUrl }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error((data as any).error || "배경 제거에 실패했습니다.");
+    }
+
+    return isValidImageSrc((data as any).imageUrl) ?? imageDataUrl;
+  };
+
   const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     setUploadProcessing(true);
+    setError(null);
     const reader = new FileReader();
     reader.onloadend = async () => {
       const result = reader.result;
       if (typeof result === "string") {
+        let normalized: string | null = null;
         try {
-          const normalized = await normalizeToFourThree(result);
-          setUserImage(normalized);
+          normalized = await normalizeToFourThree(result);
+          setOriginalUpload(normalized);
+          setBackgroundPreview(null);
+          const bgRemoved = await requestBackgroundRemoval(normalized);
+          setBackgroundPreview(bgRemoved);
+          setUserImage(bgRemoved);
+          setPreviewUrl(bgRemoved);
+          setPreviewOwner(activePreset);
         } catch (e: any) {
-          setError(e?.message || "이미지 전처리에 실패했습니다.");
+          const fallback = normalized ?? (typeof result === "string" ? result : null);
+          setOriginalUpload(fallback);
+          setUserImage(fallback);
+          if (fallback) {
+            setPreviewUrl(fallback);
+            setPreviewOwner(activePreset);
+          }
+          setError(e?.message || "이미지 전처리 또는 배경 제거에 실패했습니다.");
         } finally {
           setUploadProcessing(false);
         }
@@ -509,7 +557,50 @@ export function AIConfigurator() {
     reader.readAsDataURL(file);
   };
 
+  useEffect(() => {
+    // 현재 활성 프리셋에 마지막 편집 및 생성된 이미지(미리보기) 자동 저장
+    if (applyingPresetRef.current || skipSaveRef.current) {
+      applyingPresetRef.current = false;
+      skipSaveRef.current = false;
+      return;
+    }
+    setPresets((prev) =>
+      prev.map((preset, idx) => {
+        if (idx !== activePreset) return preset;
+        return {
+          ...preset,
+          selections: cloneSelections(selected),
+          previewUrl: previewOwner === activePreset ? previewUrl : preset.previewUrl,
+        };
+      })
+    );
+  }, [selected, activePreset, previewUrl, previewOwner]);
+
+  const handleApplyPreset = (index: number) => {
+    applyingPresetRef.current = true;
+    skipSaveRef.current = true;
+    setActivePreset(index);
+    const target = presets[index];
+    setSelected(cloneSelections(target.selections));
+    // preview 동기화는 아래 activePreset 의존 effect에서 처리
+  };
+
+  useEffect(() => {
+    // 프리셋 전환 시 해당 프리셋에 저장된 프리뷰만 노출
+    skipSaveRef.current = true;
+    const target = presets[activePreset];
+    setPreviewUrl(target?.previewUrl || "");
+    setPreviewOwner(activePreset);
+    const id = requestAnimationFrame(() => {
+      skipSaveRef.current = false;
+    });
+    return () => cancelAnimationFrame(id);
+  }, [activePreset, presets]);
+
   const generatePreview = async () => {
+    if (loading) return;
+    const requestPreset = activePreset;
+    const selectionSnapshot = cloneSelections(selected);
     setLoading(true);
     setError(null);
     try {
@@ -538,7 +629,11 @@ export function AIConfigurator() {
 
       const data = await res.json();
       const safe = isValidImageSrc(data.imageUrl) ?? "/images/suit1.png";
-      setPreviewUrl(safe);
+      setPresets((prev) => prev.map((preset, idx) => (idx === requestPreset ? { ...preset, selections: selectionSnapshot, previewUrl: safe } : preset)));
+      if (activePreset === requestPreset) {
+        setPreviewUrl(safe);
+        setPreviewOwner(requestPreset);
+      }
     } catch (err: any) {
       setError(err.message || "합성 중 오류가 발생했습니다.");
     } finally {
@@ -547,10 +642,16 @@ export function AIConfigurator() {
   };
 
   return (
-    <section className="flex h-full w-full">
+    <section className="flex flex-col xl:flex-row h-full w-full relative">
       <div className="relative h-full flex flex-col gap-6">
-        <div className="relative h-full aspect-square 2xl:aspect-4/3 overflow-hidden">
-          <NextImage alt="맞춤 자켓 프리뷰" src={previewUrl} fill className="object-contain" priority />
+        <div className="relative h-full grow xl:aspect-square 2xl:aspect-4/3 overflow-hidden">
+          {previewUrl ? (
+            <NextImage alt="맞춤 자켓 프리뷰" src={previewUrl} fill className="object-contain" priority />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <p>전신 사진을 업로드해 주세요.</p>
+            </div>
+          )}
           {loading && (
             <div className="absolute inset-0 flex items-center justify-center bg-white/70 text-sm font-semibold text-neutral-700 backdrop-blur-sm">
               AI로 합성 중...
@@ -583,7 +684,7 @@ export function AIConfigurator() {
             ) : (
               <div
                 ref={tabScrollRef}
-                className="px-6 h-20 items-center flex w-full gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide"
+                className="px-6 h-20 items-center w-full flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide"
                 onMouseDown={(e) => {
                   isDraggingRef.current = true;
                   dragPosRef.current = { x: e.clientX, scroll: tabScrollRef.current?.scrollLeft ?? 0 };
@@ -604,9 +705,10 @@ export function AIConfigurator() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`rounded-full px-4 py-2 font-medium transition ${
+                    className={cn(
+                      "rounded-full px-4 py-2 font-medium transition select-none",
                       activeTab === tab ? "border-black bg-black text-white shadow-[0_10px_30px_-18px_rgba(0,0,0,0.6)]" : ""
-                    }`}
+                    )}
                   >
                     {tab}
                   </button>
@@ -616,16 +718,26 @@ export function AIConfigurator() {
           })()}
 
           {activeTab === "사진 업로드" && (
-            <div className="w-full grow flex flex-col">
-              <div className="relative w-full h-full overflow-hidden">
-                {userImage && <NextImage alt="업로드한 전신 사진" src={userImage} fill className="object-contain" />}
+            <div className="w-full grow flex flex-col gap-3">
+              <div className="relative hidden xl:block w-full h-full overflow-hidden">
+                {originalUpload ? (
+                  <div className="relative h-full overflow-hidden">
+                    {originalUpload ? (
+                      <NextImage alt="업로드한 전신 사진" src={originalUpload} fill className="object-contain" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-xs text-neutral-500">전신 사진을 업로드하세요.</div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex h-full items-center justify-center text-sm text-neutral-500">전신 사진을 업로드하면 바로 프리뷰를 볼 수 있습니다.</div>
+                )}
               </div>
 
               <input id="user-image-input" type="file" accept="image/*" onChange={handleUpload} className="hidden" />
 
               <label
                 htmlFor="user-image-input"
-                className="flex items-center justify-center w-full h-20 bg-neutral-900 text-white text-sm md:text-base font-medium cursor-pointer hover:bg-neutral-800 transition-colors"
+                className="flex shrink-0 items-center justify-center w-full h-20 bg-neutral-900 text-white text-sm md:text-base font-medium cursor-pointer hover:bg-neutral-800 transition-colors"
               >
                 전신 사진 업로드하기
               </label>
@@ -641,7 +753,7 @@ export function AIConfigurator() {
 
                 if (hasGroups && !activeGroup[cat]) {
                   return (
-                    <div className="flex flex-col w-full h-[calc(100%-5rem)] px-6 gap-3 overflow-y-auto pt-2 pb-6">
+                    <div className="flex flex-col w-full h-[180px] xl:h-[calc(100%-5rem)] px-6 gap-3 overflow-y-auto pt-2 pb-6">
                       {groups.map((group) => {
                         const current = getSelectedOption(cat, group);
                         return (
@@ -668,7 +780,7 @@ export function AIConfigurator() {
                 }
 
                 return (
-                  <div className="flex flex-col w-full h-[calc(100%-5rem)]">
+                  <div className="flex flex-col w-full h-[180px] xl:h-[calc(100%-5rem)]">
                     <div className="flex flex-col w-full px-6 gap-3 overflow-y-auto pt-2 pb-6">
                       {catalog[cat]
                         .filter((option) => {
@@ -725,21 +837,68 @@ export function AIConfigurator() {
 
         <div className="flex items-center w-full">
           <button
-            className="flex items-center justify-center w-1/2 h-20 bg-neutral-300 hover:bg-neutral-400 text-black"
+            className={`flex items-center justify-center w-1/2 h-20 text-black transition ${
+              loading ? "bg-neutral-200 cursor-not-allowed opacity-70" : "bg-neutral-300 hover:bg-neutral-400"
+            }`}
             onClick={generatePreview}
             disabled={loading}
+            aria-busy={loading}
           >
             AI 합성
           </button>
           <button
-            className="flex items-center justify-center w-1/2 h-20 bg-neutral-700 hover:bg-neutral-800 text-white"
+            className={`flex items-center justify-center w-1/2 h-20 text-white transition ${
+              loading ? "bg-neutral-600 cursor-not-allowed opacity-70" : "bg-neutral-700 hover:bg-neutral-800"
+            }`}
             onClick={generatePreview}
-            disabled={loading}
           >
             컨시어지 문의
           </button>
         </div>
         {error && <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      </div>
+
+      <div className="absolute left-4 bottom-4 z-20 flex flex-col-reverse items-start gap-3">
+        <button
+          type="button"
+          onClick={() => setPresetOpen((open) => !open)}
+          className="flex items-center gap-2 rounded-full bg-neutral-900 w-18 justify-center py-2 text-white shadow-lg hover:bg-neutral-800 transition"
+        >
+          <span className="text-sm font-semibold">프리셋</span>
+        </button>
+
+        <AnimatePresence>
+          {presetOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 12 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-2"
+            >
+              {presets.map((preset, idx) => {
+                const isActive = idx === activePreset;
+                return (
+                  <motion.button
+                    type="button"
+                    key={preset.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.2, delay: idx * 0.03 }}
+                    onClick={() => handleApplyPreset(idx)}
+                    className={cn(
+                      "flex items-center gap-2 rounded-full w-18 justify-center text-sm py-2 backdrop-blur duration-300 transform-color",
+                      isActive ? "bg-neutral-300 text-neutral-900" : "bg-white/95 text-neutral-900"
+                    )}
+                  >
+                    {preset.name}
+                  </motion.button>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );

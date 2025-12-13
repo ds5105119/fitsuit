@@ -23,71 +23,56 @@ export async function POST(req: Request) {
     const prompt = `
 You are an image editor and stylist.
 
-STEP 1 — Read style summary (HARD CONSTRAINTS)
-- Carefully read this suit style description:
-${summary}
-- Treat every explicit detail in ${summary} as a HARD CONSTRAINT, not a suggestion.
-- This includes, but is not limited to:
-  - Number of buttons on the jacket (1, 2, 2.5, 4, 6, etc.)
-  - Closure type (single-breasted or double-breasted)
-  - Lapel style (notch, peak, shawl, etc.)
-  - Suit color (e.g. charcoal, navy, black, grey, brown)
-  - Pattern (e.g. solid, pinstripe, chalk stripe, windowpane, glen check, herringbone, houndstooth)
-- If there is ANY conflict between ${summary} and any other instruction, ALWAYS follow ${summary} first.
+TASK OVERVIEW
+- Replace the person's clothing with a tailored suit that follows this description:
+  ${summary}
 
-STEP 2 — Remove original background COMPLETELY
+- At the same time, you MUST COMPLETELY DELETE the original background and REPLACE it with a NEW flat background.
+
+HARD RULE A — BACKGROUND REMOVAL (NO EXCEPTIONS)
 - Use the first inline image ONLY as the base person photo.
-- Isolate ONLY the person (face, body, hair, hands, legs). Treat everything else as background.
-- Completely remove ALL original background, scenery, floor, walls, studio backdrops, furniture, sky, room, borders, or padding.
-- This includes ANY white or black bars, padding, letterboxing, empty space, text, logos, or graphics.
-- Do NOT preserve, reuse, blend, or copy ANY part of the original background or original canvas.
+- Keep ONLY the person: face, body, hair, hands, legs.
+- Treat EVERY other pixel as background. This includes:
+  - floor, wall, studio backdrop, furniture, room, sky,
+  - white or black bars, padding, letterboxing, margins,
+  - any logos, text, gradients, or graphics.
+- You MUST NOT preserve, reuse, blend, or copy ANY part of the original background.
+- If any original background remains visible in the result, the output is WRONG and must be fixed.
 
-STEP 3 — Preserve the person exactly
-- Keep the person’s face, body, proportions, and pose exactly as in the reference.
-- Do NOT change the facial expression, hairstyle, body shape, or limb position.
-- Only change the clothing according to the suit instructions.
+HARD RULE B — NEW BACKGROUND COLOR
+- Create a new canvas behind the person.
+- Fill the ENTIRE background with a flat solid color: #f5f5f5.
+- Every pixel that is not part of the person or their clothing MUST be exactly #f5f5f5.
+- The output must NOT contain:
+  - pure white (#ffffff),
+  - black,
+  - gradients,
+  - shadows,
+  - glows,
+  - vignettes,
+  - patterns,
+  - transparent pixels.
+- The ONLY non-#f5f5f5 pixels in the image must belong to the person and their clothing.
 
-STEP 4 — Dress them in the suit (FOLLOW HARD CONSTRAINTS)
-- Dress the person in a tailored suit that matches ${summary} as closely as possible in:
-  - design and silhouette,
-  - lapel shape,
-  - closure type,
-  - and especially the EXACT number and arrangement of buttons.
+CLOTHING RULE — SUIT DESIGN
+- Replace the original clothing with a tailored suit that follows ${summary} as strictly as possible:
+  - design and silhouette
+  - lapel shape
+  - closure type
+  - EXACT number and layout of buttons
 - Shirt: crisp white.
-- Tie: dark charcoal or navy, unless ${summary} explicitly requires a different tie style or color.
-- Suit: deep charcoal with subtle texture, unless ${summary} explicitly specifies a different color or pattern. Fabric must look realistic, with natural folds aligned to the body.
+- Tie: dark charcoal or navy, unless ${summary} requires something else.
+- Suit: deep charcoal with subtle texture, unless ${summary} specifies a different color or pattern.
+- Fabric must look realistic, with natural folds aligned to the body.
 
-STEP 5 — Create a NEW background from scratch
-- Create a NEW empty canvas behind the person.
-- Fill the ENTIRE background with a flat, solid color #f5f5f5 from edge to edge.
-- The final background must be EXACTLY #f5f5f5 everywhere and nothing else:
-  no white (#ffffff), no black, no gradients, no textures, no shadows, no glows, no vignettes, no patterns, and no transparent pixels.
-- Any area that is not part of the person or clothing MUST be pure #f5f5f5.
-- Do not keep any of the original background, padding, or borders, even partially.
+FINAL CHECK (MANDATORY)
+Before finalizing:
+1) BACKGROUND:
+   - Is 100% of the background a flat #f5f5f5 with NO leftover scenery, floor, wall, or padding?
+2) SUIT DETAILS:
+   - Does the suit match the constraints in ${summary}, especially button count, closure type, and color/pattern?
 
-STEP 6 — SELF-CHECK (VERY IMPORTANT)
-Before finalizing the image, mentally go through this checklist:
-
-1) BUTTON COUNT & CLOSURE
-   - Does the jacket have the EXACT number of buttons specified in ${summary}?
-   - Is the jacket correctly single-breasted or double-breasted as specified?
-   - If ${summary} says 1-button, 2-button, 2.5-button, 4-button DB, 6-button DB, etc.,
-     the front of the jacket MUST clearly show that exact configuration.
-
-2) COLOR & PATTERN
-   - Is the suit color (e.g. charcoal, navy, grey, black, brown) matching ${summary}?
-   - Is the pattern (solid, pinstripe, chalk stripe, windowpane, glen check, herringbone, houndstooth, etc.)
-     exactly as described in ${summary}, with the correct density and direction?
-
-3) BACKGROUND
-   - Is every background pixel exactly #f5f5f5 with NO leftover scenery, floor, wall, or padding?
-
-If any of these checks fail, correct the image so that it strictly satisfies ${summary} and all constraints above.
-
-FINAL OUTPUT
-- Output a realistic photo-style render.
-- The suit must be aligned precisely to the body with natural proportions.
-- The suit design must clearly and exactly reflect the constraints in ${summary}, especially button count, closure type, color, and pattern.`;
+If any check fails, correct the image so that it fully follows the rules above.`;
 
     const ai = new GoogleGenAI({ apiKey });
     const contents: ContentListUnion = [];
