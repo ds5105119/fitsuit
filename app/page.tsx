@@ -14,7 +14,7 @@ export default function HomePage() {
   const cardItems = [
     {
       alt: "원단 선택 사진",
-      src: "/images/Bespoke_01 원단 선택.avif",
+      src: "/images/Bespoke_06 재단2_JPG.avif",
     },
     {
       alt: "이정구 명장 사진",
@@ -51,7 +51,6 @@ export default function HomePage() {
 
   return (
     <LenisProvider>
-      {" "}
       <main className="min-h-screen bg-black text-white">
         <section className="relative min-h-screen overflow-hidden">
           <video autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover">
