@@ -3,23 +3,45 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { BriefcaseBusinessIcon, ChevronDownIcon, MapPinIcon, Menu, XIcon } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-export function SiteHeader() {
-  const [scrolled, setScrolled] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const pathname = usePathname();
+export const mainNav = [
+  { label: "정장 맞추기", href: "/ai" },
+  { label: "명장 소개", href: "/about" },
+  { label: "매장 안내", href: "/showroom" },
+  { label: "문의하기", href: "/contact" },
+];
 
-  const updateScrolled = useCallback(() => {
-    const canScroll = document.documentElement.scrollHeight - window.innerHeight > 8;
-    setScrolled(!canScroll || window.scrollY > 40);
-  }, []);
+export const secondaryNav = [
+  { label: "사진 및 동영상", href: "/about" },
+  { label: "Works", href: "/showroom" },
+];
+
+export function SiteHeader() {
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+  const isHome = pathname === "/";
 
   useEffect(() => {
+    setSheetOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!isHome) {
+      setScrolled(true);
+      return;
+    }
+
+    const updateScrolled = () => {
+      const canScroll = document.documentElement.scrollHeight - window.innerHeight > 8;
+      setScrolled(!canScroll ? false : window.scrollY > 40);
+    };
+
     updateScrolled();
     window.addEventListener("scroll", updateScrolled);
     window.addEventListener("resize", updateScrolled);
@@ -27,23 +49,14 @@ export function SiteHeader() {
       window.removeEventListener("scroll", updateScrolled);
       window.removeEventListener("resize", updateScrolled);
     };
-  }, [updateScrolled]);
+  }, [isHome]);
 
-  useEffect(() => {
-    // 라우트가 바뀔 때 레이아웃/스크롤 상태를 다시 계산하고 시트를 닫는다.
-    const id = requestAnimationFrame(updateScrolled);
-    setSheetOpen(false);
-    return () => cancelAnimationFrame(id);
-  }, [pathname, updateScrolled]);
+  const toneClass = scrolled || !isHome ? "text-neutral-900" : "text-white";
+  const headerBg = scrolled || !isHome ? "bg-white/70 text-neutral-900 shadow-[0_20px_80px_rgba(0,0,0,0.08)] backdrop-blur-md" : "bg-transparent";
 
   return (
-    <header
-      className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-all duration-500",
-        scrolled ? "bg-white/75 text-black shadow-[0_20px_80px_rgba(0,0,0,0.1)] backdrop-blur-md" : "bg-transparent text-white"
-      )}
-    >
-      <div className="mx-auto flex justify-between items-center gap-4 h-16 lg:h-20 px-6">
+    <header className={cn("fixed inset-x-0 top-0 z-50 transition-colors duration-300", headerBg)}>
+      <div className={cn("mx-auto flex justify-between items-center gap-4 h-16 lg:h-20 px-6", toneClass)}>
         <div className="flex space-x-12 items-center">
           <Link href="/" className="shrink-0 flex items-center justify-start gap-3 text-lg font-mediu tracking-[0.18em]">
             <div className="relative h-8 lg:h-12 aspect-346/87 overflow-hidden">
@@ -52,32 +65,24 @@ export function SiteHeader() {
           </Link>
 
           <div className="shrink-0 hidden lg:flex items-center justify-start">
-            <nav className="flex space-x-6 text-xs font-normal">
-              <Link href="/ai" onClick={() => setSheetOpen(false)}>
-                정장 맞추기
-              </Link>
-              <Link href="/about" onClick={() => setSheetOpen(false)}>
-                명장 소개
-              </Link>
-              <Link href="/showroom" onClick={() => setSheetOpen(false)}>
-                매장 안내
-              </Link>
-              <Link href="/contact" onClick={() => setSheetOpen(false)}>
-                문의하기
-              </Link>
-              <Link href="/about" onClick={() => setSheetOpen(false)}>
-                사진 및 동영상
-              </Link>
-              <Link href="/showroom" onClick={() => setSheetOpen(false)}>
-                Works
-              </Link>
+            <nav className="flex space-x-6 text-xs font-normal transition-colors">
+              {mainNav.map((item) => (
+                <Link key={item.href + item.label} href={item.href} onClick={() => setSheetOpen(false)}>
+                  {item.label}
+                </Link>
+              ))}
+              {secondaryNav.map((item) => (
+                <Link key={item.href + item.label} href={item.href} onClick={() => setSheetOpen(false)}>
+                  {item.label}
+                </Link>
+              ))}
             </nav>
           </div>
         </div>
 
         <div className="flex items-center">
           <div className="shrink-0 hidden lg:flex items-center justify-end">
-            <nav className="flex items-center space-x-6 text-xs font-medium">
+            <nav className="flex items-center space-x-6 text-xs font-medium transition-colors">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link href="/ai">
@@ -123,29 +128,21 @@ export function SiteHeader() {
 
                 <div className="pt-6 px-6 space-y-8">
                   <nav className="flex flex-col space-y-3 text-xl font-bold">
-                    <Link href="/ai" onClick={() => setSheetOpen(false)}>
-                      정장 맞추기
-                    </Link>
-                    <Link href="/about" onClick={() => setSheetOpen(false)}>
-                      명장 소개
-                    </Link>
-                    <Link href="/showroom" onClick={() => setSheetOpen(false)}>
-                      매장 안내
-                    </Link>
-                    <Link href="/contact" onClick={() => setSheetOpen(false)}>
-                      문의하기
-                    </Link>
+                    {mainNav.slice(0, 4).map((item) => (
+                      <Link key={item.href + item.label} href={item.href} onClick={() => setSheetOpen(false)}>
+                        {item.label}
+                      </Link>
+                    ))}
                   </nav>
 
                   <div className="w-10 h-px bg-black" />
 
                   <nav className="flex flex-col space-y-3 text-lg font-semibold">
-                    <Link href="/about" onClick={() => setSheetOpen(false)}>
-                      사진 및 동영상
-                    </Link>
-                    <Link href="/showroom" onClick={() => setSheetOpen(false)}>
-                      Works
-                    </Link>
+                    {secondaryNav.map((item) => (
+                      <Link key={item.href + item.label} href={item.href} onClick={() => setSheetOpen(false)}>
+                        {item.label}
+                      </Link>
+                    ))}
                   </nav>
                 </div>
               </div>

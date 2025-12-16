@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 import "./globals.css";
@@ -44,6 +45,7 @@ export default function RootLayout({
         <body className="antialiased">
           <SiteHeader />
           {children}
+          <SiteFooter />
         </body>
       </TooltipProvider>
     </html>
