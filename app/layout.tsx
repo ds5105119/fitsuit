@@ -42,7 +42,7 @@ export default function RootLayout({
   return (
     <html className={`${geist.variable} ${geistMono.variable} ${playfair.variable}`} lang="en" suppressHydrationWarning>
       <TooltipProvider>
-        <body className="antialiased">
+        <body className="antialiased bg-white">
           <SiteHeader />
           {children}
           <SiteFooter />

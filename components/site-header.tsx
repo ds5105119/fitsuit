@@ -96,7 +96,7 @@ export function SiteHeader() {
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link href="/shop">
+                  <Link href="/showroom">
                     <MapPinIcon size="1.2rem" />
                   </Link>
                 </TooltipTrigger>

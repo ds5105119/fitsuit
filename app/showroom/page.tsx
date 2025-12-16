@@ -22,12 +22,9 @@ export default function ContactPage() {
             <div className="flex flex-col space-y-2">
               <p className="text-xs lg:text-sm">주소</p>
               <p className="text-xs lg:text-sm leading-normal">
-                ​서울시 강남구 봉은사로
-                <br />
-                524 웨스틴 서울 파르나스
-                <br />
-                지하아케이드 B2 C-17
-                <br />
+                ​서울시 강남구 봉은사로 <br />
+                524 웨스틴 서울 파르나스 <br />
+                지하아케이드 B2 C-17 <br />
                 골드핑거 양복점
               </p>
             </div>
@@ -39,7 +36,7 @@ export default function ContactPage() {
                 수요일: 9:30am - 19:30pm <br />
                 목요일: 9:30am - 19:30pm <br />
                 금요일: 9:30am - 19:30pm <br />
-                토요일: 9:30am - 19:30pm <br />
+                토요일: 9:30am - 19:30pm
               </p>
             </div>
           </div>
