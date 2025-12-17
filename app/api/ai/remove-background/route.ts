@@ -18,25 +18,40 @@ export async function POST(req: Request) {
     const prompt = `
 You are an expert background remover.
 
+SOURCE
+- Use ONLY the first inline image as input.
+- The foreground subject is the person (head to toe). Everything that is NOT the person is background.
+
 TASK
-- Use ONLY the first inline image as the source.
-- Keep the full person (head to toe) exactly as-is: pose, clothing, lighting, proportions.
-- DELETE 100% of the original background.
-- Create a NEW canvas behind the subject and fill the entire background with a flat solid color: #f5f5f5.
+- Keep the person exactly as-is: same pose, same body proportions, same clothing.
+- Remove 100% of the original background, including floor, wall, sky, furniture, props, text, and any blank or padded areas.
+- Create a NEW canvas behind the person and fill it with a single flat color: #f5f5f5.
 
 HARD RULES — NO EXCEPTIONS
-- Do NOT crop out any body parts.
-- Do NOT keep or blend any original background pixels.
-- The new background must be a single flat color (#f5f5f5) with ZERO gradients, shadows, glows, patterns, or transparency.
-- The ONLY non-#f5f5f5 pixels must belong to the person and what they are wearing.
+- Do NOT crop out or cut off any part of the body (no missing feet, hands, or head).
+- Do NOT keep, blend, or reuse any pixel from the original background.
+- Treat all floor, shadows on the floor or wall, and any environment lighting as background. Replace them with #f5f5f5.
+- The new background must be a single flat color (#f5f5f5) with ZERO gradients, shadows, glows, patterns, textures, or transparent areas.
+- The ONLY non-#f5f5f5 pixels in the final image must belong to the person and what they are wearing (clothes, accessories, hair).
 
-FINAL CHECK
-1) Is every background pixel exactly #f5f5f5?
-2) Is the person fully intact with no missing limbs or cut-off feet/hands?
-If not, fix it before returning the image.`;
+FINAL SELF-CHECK
+Before returning the image, check the following:
+
+1) BACKGROUND
+   - Zoom in mentally and verify that every pixel that is not part of the person is exactly #f5f5f5.
+   - There must be no remaining pieces of the original scene, floor, wall, background color, or letterbox padding.
+
+2) PERSON
+   - Confirm that the person is fully intact from head to toe, with no body parts cropped out or cut off.
+
+If any original background or floor/shadow pixels remain, or if any body part is missing,
+FIX THE IMAGE FIRST and only then return the final result.`;
 
     const ai = new GoogleGenAI({ apiKey });
-    const contents: ContentListUnion = [{ inlineData: { data: userImage.split(",")[1] || "", mimeType: userImage.match(/data:(.*);base64/)?.[1] || "image/png" } }, { text: prompt }];
+    const contents: ContentListUnion = [
+      { inlineData: { data: userImage.split(",")[1] || "", mimeType: userImage.match(/data:(.*);base64/)?.[1] || "image/png" } },
+      { text: prompt },
+    ];
 
     const result = await ai.models.generateContent({
       model: "gemini-2.5-flash-image",
@@ -44,9 +59,9 @@ If not, fix it before returning the image.`;
       config: { responseModalities: ["IMAGE"] },
     });
 
-    const firstPart = result.candidates?.[0]?.content?.parts?.find(
-      (part: any) => part.inlineData && part.inlineData.data
-    ) as { inlineData?: { data: string; mimeType?: string } } | undefined;
+    const firstPart = result.candidates?.[0]?.content?.parts?.find((part: any) => part.inlineData && part.inlineData.data) as
+      | { inlineData?: { data: string; mimeType?: string } }
+      | undefined;
 
     const mime = firstPart?.inlineData?.mimeType || "image/png";
     const data = firstPart?.inlineData?.data;

@@ -177,7 +177,7 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 px-6 pb-6">
+        <div className="flex sticky bottom-0">
           <button onClick={onEdit} className="rounded-full border px-5 py-3 text-sm font-semibold hover:bg-neutral-50">
             계속 편집
           </button>
