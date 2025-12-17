@@ -2,9 +2,11 @@
 
 import NextImage from "next/image";
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { motion, useInView } from "framer-motion";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import type { ConfigOption, WearCategory } from "./types";
 import { TicketsIcon, XIcon } from "lucide-react";
+import { Button } from "../ui/button";
 
 type SummaryViewProps = {
   previewUrl: string;
@@ -21,6 +23,7 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
   const filtered = summaryItems.filter(([cat]) => visibleCats.includes(cat));
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
+  const ctaRef = useRef<HTMLDivElement | null>(null);
   const measurementFields = [
     { key: "height", label: "키", placeholder: "예: 175cm" },
     { key: "weight", label: "체중", placeholder: "예: 68kg" },
@@ -63,10 +66,14 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
     return () => ro.disconnect();
   }, []);
 
+  const ctaInView = useInView(ctaRef, {
+    margin: "0px 0px -100px 0px",
+  });
+
   return (
     <section className="h-full w-full bg-white">
-      <div ref={wrapRef} className="flex h-full w-full flex-col gap-12 lg:gap-16 lg:w-3/4 mx-auto">
-        <div className="flex items-center justify-center px-6 pt-12 lg:pt-16">
+      <div ref={wrapRef} className="flex h-full w-full flex-col gap-12 lg:gap-16 lg:w-3/4 mx-auto pb-12 lg:pb-16 pt-12 lg:pt-16">
+        <div className="flex items-center justify-center px-6">
           <h2 className="text-2xl lg:text-4xl font-bold">맞춤 수트 요약</h2>
         </div>
 
@@ -76,7 +83,6 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
               <NextImage alt="맞춤 자켓 프리뷰" src={hero} fill className="object-cover" priority />
             </div>
           </div>
-
           <div ref={listRef} className="flex flex-col gap-12 grow">
             {filtered.map(([cat, groupMap]) => {
               const entries = Object.entries(groupMap || {});
@@ -104,7 +110,6 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
                 </div>
               );
             })}
-
             <div>
               <div className="flex space-x-2 items-center mb-3">
                 <TicketsIcon className="size-6 text-blue-500" />
@@ -174,16 +179,45 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
                 </SheetContent>
               </Sheet>
             </div>
+
+            <div ref={ctaRef} className="flex flex-col space-y-2">
+              <div className="flex space-x-2">
+                <div>
+                  <p className="text-xs lg:text-sm font-semibold text-neutral-900">Delivery time</p>
+                  <p className="text-xs lg:text-sm text-neutral-600">2-3 weeks</p>
+                </div>
+              </div>
+              <Button variant="outline" onClick={onEdit}>
+                계속 편집
+              </Button>
+              <Button>컨시어지 문의 전송</Button>
+            </div>
           </div>
         </div>
-
-        <div className="flex sticky bottom-0">
-          <button onClick={onEdit} className="rounded-full border px-5 py-3 text-sm font-semibold hover:bg-neutral-50">
-            계속 편집
-          </button>
-          <button className="rounded-full bg-neutral-900 px-6 py-3 text-sm font-semibold text-white hover:bg-neutral-800">컨시어지 문의 전송</button>
-        </div>
       </div>
+
+      <motion.div
+        initial={false}
+        animate={ctaInView ? { y: 96, opacity: 0 } : { y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 320, damping: 32, mass: 0.9 }}
+        className="flex fixed bottom-0 h-22 w-full border-t border-t-neutral-300 bg-white"
+      >
+        <div className="w-full h-full flex items-center justify-between lg:w-3/4 px-6 mx-auto">
+          <div className="flex space-x-2">
+            <div>
+              <p className="text-xs lg:text-sm font-semibold text-neutral-900">Delivery time</p>
+              <p className="text-xs lg:text-sm text-neutral-600">2-3 weeks</p>
+            </div>
+          </div>
+
+          <div className="flex space-x-2">
+            <Button variant="outline" onClick={onEdit}>
+              계속 편집
+            </Button>
+            <Button>컨시어지 문의 전송</Button>
+          </div>
+        </div>
+      </motion.div>
     </section>
   );
 }
