@@ -130,23 +130,23 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
                     <SheetDescription>정확한 맞춤을 위해 치수를 입력해 주세요.</SheetDescription>
                   </SheetHeader>
 
-                  <div className="relative w-full h-full">
+                  <div className="relative w-full h-full overflow-y-auto">
                     <SheetClose asChild>
                       <button className="bg-white flex items-center justify-center w-6 h-6 shrink-0 rounded-full absolute right-3 top-3">
                         <XIcon className="size-4" />
                       </button>
                     </SheetClose>
 
-                    <div className="space-y-10">
+                    <div className="flex flex-col h-full space-y-10">
                       <div className="pt-12 flex flex-col space-y-4 items-center">
                         <TicketsIcon className="size-8 text-neutral-900" />
                         <h2 className="text-2xl font-bold text-neutral-900">신체 사이즈 입력</h2>
                       </div>
 
-                      <form className="space-y-6" onSubmit={handleMeasurementSubmit}>
-                        <div className="grid grid-cols-1 gap-2 px-6 lg:px-12">
+                      <form className="grow flex flex-col space-y-6" onSubmit={handleMeasurementSubmit}>
+                        <div className="grow grid grid-cols-1 gap-2 px-6 lg:px-12">
                           {measurementFields.map((field) => (
-                            <label key={field.key} className="flex flex-col gap-2 text-sm font-semibold text-neutral-800">
+                            <label key={field.key} className="flex flex-col gap-1 text-sm font-semibold text-neutral-800">
                               <span>{field.label}</span>
                               <input
                                 type="text"
@@ -159,7 +159,7 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
                           ))}
                         </div>
 
-                        <SheetFooter className="absolute w-full bottom-0 h-16 border-t border-t-neutral-300">
+                        <SheetFooter className="sticky bottom-0 h-16 border-t border-t-neutral-300 bg-neutral-100">
                           <div className="w-full h-full p-2.5">
                             <SheetClose asChild>
                               <button type="submit" className="w-full h-full bg-neutral-700 text-sm font-semibold text-white hover:bg-neutral-800">
