@@ -20,32 +20,24 @@ You are an expert background remover.
 
 SOURCE
 - Use ONLY the first inline image as input.
-- The foreground subject is the person (head to toe). Everything that is NOT the person is background.
+- The foreground subject is the person (head to toe). Everything else is background.
 
 TASK
-- Keep the person exactly as-is: same pose, same body proportions, same clothing.
-- Remove 100% of the original background, including floor, wall, sky, furniture, props, text, and any blank or padded areas.
-- Create a NEW canvas behind the person and fill it with a single flat color: #f5f5f5.
+- Keep the person exactly as they are: same pose, body proportions, face, hair, and clothing.
+- Remove 100% of the original background, including floor, walls, shadows on the floor or wall, furniture, text, logos, and any padding or empty areas.
+- Create a new background behind the person and fill it with a single flat color: #f5f5f5.
 
-HARD RULES — NO EXCEPTIONS
-- Do NOT crop out or cut off any part of the body (no missing feet, hands, or head).
+HARD RULES
+- Do NOT crop or cut off any part of the body (no missing feet, hands, or head).
 - Do NOT keep, blend, or reuse any pixel from the original background.
-- Treat all floor, shadows on the floor or wall, and any environment lighting as background. Replace them with #f5f5f5.
-- The new background must be a single flat color (#f5f5f5) with ZERO gradients, shadows, glows, patterns, textures, or transparent areas.
-- The ONLY non-#f5f5f5 pixels in the final image must belong to the person and what they are wearing (clothes, accessories, hair).
+- Any pixel that is not part of the person or their clothing must be exactly #f5f5f5.
+- No gradients, no textures, no patterns, no glow, no vignette, no transparency.
 
-FINAL SELF-CHECK
-Before returning the image, check the following:
+FINAL CHECK
+1) Background: every pixel that is not part of the person is exactly #f5f5f5.
+2) Person: full body is visible from head to toe with no parts cut off.
 
-1) BACKGROUND
-   - Zoom in mentally and verify that every pixel that is not part of the person is exactly #f5f5f5.
-   - There must be no remaining pieces of the original scene, floor, wall, background color, or letterbox padding.
-
-2) PERSON
-   - Confirm that the person is fully intact from head to toe, with no body parts cropped out or cut off.
-
-If any original background or floor/shadow pixels remain, or if any body part is missing,
-FIX THE IMAGE FIRST and only then return the final result.`;
+If any background remains or any body part is missing, fix the image and only then return the final result.`;
 
     const ai = new GoogleGenAI({ apiKey });
     const contents: ContentListUnion = [
