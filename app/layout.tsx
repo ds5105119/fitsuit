@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
+import { Suspense } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -43,7 +44,9 @@ export default function RootLayout({
     <html className={`${geist.variable} ${geistMono.variable} ${playfair.variable}`} lang="en" suppressHydrationWarning>
       <TooltipProvider>
         <body className="antialiased bg-white">
-          <SiteHeader />
+          <Suspense fallback={null}>
+            <SiteHeader />
+          </Suspense>
           {children}
           <SiteFooter />
         </body>

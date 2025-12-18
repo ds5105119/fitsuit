@@ -1,9 +1,15 @@
-import { MyPageContent } from "@/app/mypage/_components/mypage-content";
+import { MyPageContent } from "@/components/mypage/mypage-content";
+import { SuspenseSkeleton } from "@/components/suspense-skeleton";
+import { Suspense } from "react";
 
 export const metadata = {
   title: "마이페이지 | GOLD FINGER",
 };
 
 export default function MyPage() {
-  return <MyPageContent />;
+  return (
+    <Suspense fallback={<SuspenseSkeleton />}>
+      <MyPageContent />
+    </Suspense>
+  );
 }

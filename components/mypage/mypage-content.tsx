@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getUserSession } from "@/lib/auth/user-session";
 import { listConciergeOrdersForUser } from "@/lib/db/queries";
+import { auth } from "@/auth";
 
 function formatDate(input: Date) {
   return new Intl.DateTimeFormat("ko-KR", {
@@ -11,7 +11,7 @@ function formatDate(input: Date) {
 }
 
 export async function MyPageContent() {
-  const session = await getUserSession();
+  const session = await auth();
   const email = session?.user?.email;
   if (!email) {
     redirect("/mypage/login?callbackUrl=/mypage");
@@ -31,10 +31,7 @@ export async function MyPageContent() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Link
-              href="/ai"
-              className="h-10 px-4 inline-flex items-center border border-neutral-300 bg-white text-sm hover:bg-neutral-100"
-            >
+            <Link href="/ai" className="h-10 px-4 inline-flex items-center border border-neutral-300 bg-white text-sm hover:bg-neutral-100">
               정장 맞추기
             </Link>
             <a
@@ -52,10 +49,7 @@ export async function MyPageContent() {
               <p className="text-sm font-semibold">마이페이지 메뉴</p>
             </div>
             <nav className="px-2 py-2 text-sm">
-              <Link
-                href="/mypage"
-                className="flex items-center justify-between px-2 py-3 hover:bg-neutral-100"
-              >
+              <Link href="/mypage" className="flex items-center justify-between px-2 py-3 hover:bg-neutral-100">
                 <span>주문/배송 조회</span>
                 <span className="text-xs text-neutral-500">{orders.length}</span>
               </Link>
@@ -69,9 +63,7 @@ export async function MyPageContent() {
             <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-4">
               <div>
                 <p className="text-sm font-semibold">주문/배송 조회</p>
-                <p className="text-xs text-neutral-500">
-                  AI 컨시어지로 접수한 맞춤 수트 주문 내역입니다.
-                </p>
+                <p className="text-xs text-neutral-500">AI 컨시어지로 접수한 맞춤 수트 주문 내역입니다.</p>
               </div>
             </div>
 
@@ -89,26 +81,15 @@ export async function MyPageContent() {
                 <tbody>
                   {orders.map((order) => (
                     <tr key={order.id} className="border-b border-neutral-200">
-                      <td className="px-4 py-3 text-neutral-700">
-                        {formatDate(new Date(order.createdAt))}
-                      </td>
-                      <td className="px-4 py-3 font-mono text-xs text-neutral-700">
-                        {order.id.slice(0, 8).toUpperCase()}
-                      </td>
+                      <td className="px-4 py-3 text-neutral-700">{formatDate(new Date(order.createdAt))}</td>
+                      <td className="px-4 py-3 font-mono text-xs text-neutral-700">{order.id.slice(0, 8).toUpperCase()}</td>
                       <td className="px-4 py-3">
                         <div className="font-semibold">AI 맞춤 수트</div>
-                        <div className="text-xs text-neutral-500">
-                          컨시어지 주문
-                        </div>
+                        <div className="text-xs text-neutral-500">컨시어지 주문</div>
                       </td>
-                      <td className="px-4 py-3 text-neutral-700">
-                        {order.status}
-                      </td>
+                      <td className="px-4 py-3 text-neutral-700">{order.status}</td>
                       <td className="px-4 py-3">
-                        <Link
-                          href={`/mypage/orders/${order.id}`}
-                          className="text-neutral-900 underline underline-offset-4"
-                        >
+                        <Link href={`/mypage/orders/${order.id}`} className="text-neutral-900 underline underline-offset-4">
                           보기
                         </Link>
                       </td>
@@ -116,12 +97,8 @@ export async function MyPageContent() {
                   ))}
                   {orders.length === 0 && (
                     <tr>
-                      <td
-                        colSpan={5}
-                        className="px-4 py-10 text-center text-neutral-500"
-                      >
-                        아직 주문이 없습니다. AI 정장 맞추기에서 컨시어지 주문을
-                        전송해 보세요.
+                      <td colSpan={5} className="px-4 py-10 text-center text-neutral-500">
+                        아직 주문이 없습니다. AI 정장 맞추기에서 컨시어지 주문을 전송해 보세요.
                       </td>
                     </tr>
                   )}
@@ -134,4 +111,3 @@ export async function MyPageContent() {
     </main>
   );
 }
-
