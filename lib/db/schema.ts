@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { jsonb, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import type { InferSelectModel } from "drizzle-orm";
 
 export const inquiry = pgTable("Inquiry", {
@@ -21,3 +21,18 @@ export const adminUser = pgTable("AdminUser", {
 });
 
 export type AdminUser = InferSelectModel<typeof adminUser>;
+
+export const conciergeOrder = pgTable("ConciergeOrder", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  userEmail: varchar("userEmail", { length: 160 }).notNull(),
+  userName: varchar("userName", { length: 120 }),
+  status: varchar("status", { length: 32 }).notNull().default("접수"),
+  selections: jsonb("selections").notNull(),
+  measurements: jsonb("measurements"),
+  previewUrl: text("previewUrl"),
+  originalUpload: text("originalUpload"),
+  backgroundPreview: text("backgroundPreview"),
+});
+
+export type ConciergeOrder = InferSelectModel<typeof conciergeOrder>;

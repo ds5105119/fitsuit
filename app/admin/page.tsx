@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { AdminDashboard } from "@/components/admin-dashboard";
+import { AdminOrdersDashboard } from "@/components/admin-orders-dashboard";
 import { AdminSettings } from "@/components/admin-settings";
 
 export const metadata = {
-  title: "Admin | Inquiries",
+  title: "Admin | Dashboard",
 };
 
 export default function AdminPage() {
@@ -31,6 +32,7 @@ export default function AdminPage() {
         </div>
 
         <AdminSettings />
+        <AdminOrdersDashboard />
         <AdminDashboard />
       </div>
     </main>

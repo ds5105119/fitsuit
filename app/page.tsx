@@ -150,7 +150,7 @@ export default function HomePage() {
 
           <div className="flex flex-col space-y-48">
             {bespokeSteps.slice(0, 2).map((step, idx) => (
-              <div key={step.title} className="grid px-6 lg:px-24 items-center gap-10 px-6 mx-auto lg:grid-cols-5">
+              <div key={step.title} className="grid px-6 lg:px-24 items-center gap-10 mx-auto lg:grid-cols-5">
                 <div className={cn("relative aspect-4/3 w-full overflow-hidden lg:col-span-3", idx % 2 === 1 && "lg:order-2")}>
                   <Image alt={step.title} src={step.image} fill priority className="object-cover" />
                 </div>
@@ -174,7 +174,7 @@ export default function HomePage() {
             </div>
 
             {bespokeSteps.slice(2, 4).map((step, idx) => (
-              <div key={step.title} className="grid px-6 lg:px-24 items-center gap-10 px-6 mx-auto lg:grid-cols-5">
+              <div key={step.title} className="grid px-6 lg:px-24 items-center gap-10 mx-auto lg:grid-cols-5">
                 <div className={cn("relative aspect-4/3 w-full overflow-hidden lg:col-span-3", idx % 2 === 1 && "lg:order-2")}>
                   <Image alt={step.title} src={step.image} fill priority className="object-cover" />
                 </div>

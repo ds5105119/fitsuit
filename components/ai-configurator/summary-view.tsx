@@ -2,6 +2,7 @@
 
 import NextImage from "next/image";
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, useInView } from "framer-motion";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import type { ConfigOption, WearCategory } from "./types";
@@ -18,6 +19,7 @@ type SummaryViewProps = {
 };
 
 export function SummaryView({ previewUrl, backgroundPreview, originalUpload, summaryItems, onEdit, onSelectOption }: SummaryViewProps) {
+  const router = useRouter();
   const hero = previewUrl || backgroundPreview || originalUpload || "";
   const visibleCats: WearCategory[] = ["원단", "재킷", "바지", "셔츠"];
   const filtered = summaryItems.filter(([cat]) => visibleCats.includes(cat));
@@ -45,12 +47,76 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
 
   const filledCount = Object.values(measurements).filter(Boolean).length;
 
+  const [orderSubmitting, setOrderSubmitting] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
+
   const handleMeasurementChange = (key: MeasurementKey, value: string) => {
     setMeasurements((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleMeasurementSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+  };
+
+  const submitOrder = async () => {
+    if (orderSubmitting) return;
+    setOrderSubmitting(true);
+    setOrderError(null);
+
+    const cleanedMeasurements = Object.fromEntries(
+      Object.entries(measurements)
+        .map(([k, v]) => [k, v.trim()] as const)
+        .filter(([, v]) => Boolean(v))
+    );
+
+    const selections = summaryItems.flatMap(([category, groupMap]) =>
+      Object.entries(groupMap || {}).map(([groupKey, option]) => ({
+        category,
+        group: groupKey === "default" ? null : groupKey,
+        title: option.title,
+        subtitle: option.subtitle,
+      }))
+    );
+
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          selections,
+          measurements: Object.keys(cleanedMeasurements).length
+            ? cleanedMeasurements
+            : null,
+          previewUrl: previewUrl || null,
+          originalUpload: originalUpload || null,
+          backgroundPreview: backgroundPreview || null,
+        }),
+      });
+
+      if (res.status === 401) {
+        setOrderError("로그인 후 주문 전송이 가능합니다.");
+        router.push(`/mypage/login?callbackUrl=${encodeURIComponent("/ai")}`);
+        return;
+      }
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setOrderError(data?.error || "주문 전송에 실패했습니다.");
+        return;
+      }
+
+      const orderId = data?.order?.id;
+      if (typeof orderId === "string") {
+        router.push(`/mypage/orders/${orderId}`);
+        return;
+      }
+
+      router.push("/mypage");
+    } catch (e: any) {
+      setOrderError(e?.message || "주문 전송 중 오류가 발생했습니다.");
+    } finally {
+      setOrderSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -190,7 +256,10 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
               <Button variant="outline" onClick={onEdit}>
                 계속 편집
               </Button>
-              <Button>컨시어지 문의 전송</Button>
+              <Button onClick={submitOrder} disabled={orderSubmitting}>
+                {orderSubmitting ? "전송 중..." : "컨시어지 주문 전송"}
+              </Button>
+              {orderError ? <p className="text-xs text-red-600">{orderError}</p> : null}
             </div>
           </div>
         </div>
@@ -211,10 +280,10 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
           </div>
 
           <div className="flex space-x-2">
-            <Button variant="outline" onClick={onEdit}>
-              계속 편집
+            <Button variant="outline">Finish in-store</Button>
+            <Button onClick={submitOrder} disabled={orderSubmitting}>
+              {orderSubmitting ? "전송 중..." : "컨시어지 주문 전송"}
             </Button>
-            <Button>컨시어지 문의 전송</Button>
           </div>
         </div>
       </motion.div>

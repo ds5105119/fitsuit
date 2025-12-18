@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BriefcaseBusinessIcon, ChevronDownIcon, MapPinIcon, Menu, XIcon } from "lucide-react";
+import { BriefcaseBusinessIcon, ChevronDownIcon, MapPinIcon, Menu, UserIcon, XIcon } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -80,9 +80,20 @@ export function SiteHeader() {
           </div>
         </div>
 
-        <div className="flex items-center">
+        <div className="flex items-center space-x-6">
           <div className="shrink-0 hidden lg:flex items-center justify-end">
             <nav className="flex items-center space-x-6 text-xs font-medium transition-colors">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link href="/mypage">
+                    <UserIcon size="1.2rem" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>마이페이지</p>
+                </TooltipContent>
+              </Tooltip>
+
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link href="/ai">
@@ -111,6 +122,10 @@ export function SiteHeader() {
               </div>
             </nav>
           </div>
+
+          <Link href="/mypage" className="lg:hidden">
+            <UserIcon />
+          </Link>
 
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger>
