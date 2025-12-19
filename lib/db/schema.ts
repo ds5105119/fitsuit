@@ -36,3 +36,6 @@ export const conciergeOrder = pgTable("ConciergeOrder", {
 });
 
 export type ConciergeOrder = InferSelectModel<typeof conciergeOrder>;
+
+// Auth.js (NextAuth v5) tables (Drizzle-backed custom adapter)
+// Auth.js Passkey/WebAuthn tables removed. Add back via migrations if needed.

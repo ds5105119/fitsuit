@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthSessionProvider } from "@/components/auth/auth-session-provider";
 
 import "./globals.css";
 
@@ -44,11 +45,13 @@ export default function RootLayout({
     <html className={`${geist.variable} ${geistMono.variable} ${playfair.variable}`} lang="en" suppressHydrationWarning>
       <TooltipProvider>
         <body className="antialiased bg-white">
-          <Suspense fallback={null}>
-            <SiteHeader />
-          </Suspense>
-          {children}
-          <SiteFooter />
+          <AuthSessionProvider>
+            <Suspense fallback={null}>
+              <SiteHeader />
+            </Suspense>
+            {children}
+            <SiteFooter />
+          </AuthSessionProvider>
         </body>
       </TooltipProvider>
     </html>

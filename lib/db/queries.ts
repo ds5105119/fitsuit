@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "./client";
 import { conciergeOrder, inquiry } from "./schema";
 
@@ -30,24 +30,7 @@ export type NewConciergeOrder = {
   status?: string | null;
 };
 
-export async function ensureInquiryTable() {
-  await db.execute(sql`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS "Inquiry" (
-      "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-      "createdAt" timestamp NOT NULL DEFAULT now(),
-      "name" varchar(120) NOT NULL,
-      "email" varchar(160) NOT NULL,
-      "phone" varchar(64),
-      "message" text NOT NULL,
-      "attachmentUrl" text
-    )
-  `);
-}
-
 export async function saveInquiry(data: NewInquiry) {
-  await ensureInquiryTable();
-
   await db.insert(inquiry).values({
     name: data.name,
     email: data.email,
@@ -58,34 +41,13 @@ export async function saveInquiry(data: NewInquiry) {
 }
 
 export async function listInquiries() {
-  await ensureInquiryTable();
   return db
     .select()
     .from(inquiry)
     .orderBy(sql`"createdAt" DESC`);
 }
 
-export async function ensureConciergeOrderTable() {
-  await db.execute(sql`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS "ConciergeOrder" (
-      "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-      "createdAt" timestamp NOT NULL DEFAULT now(),
-      "userEmail" varchar(160) NOT NULL,
-      "userName" varchar(120),
-      "status" varchar(32) NOT NULL DEFAULT '접수',
-      "selections" jsonb NOT NULL,
-      "measurements" jsonb,
-      "previewUrl" text,
-      "originalUpload" text,
-      "backgroundPreview" text
-    )
-  `);
-}
-
 export async function saveConciergeOrder(data: NewConciergeOrder) {
-  await ensureConciergeOrderTable();
-
   const [row] = await db
     .insert(conciergeOrder)
     .values({
@@ -107,11 +69,10 @@ export async function saveConciergeOrder(data: NewConciergeOrder) {
 }
 
 export async function listConciergeOrdersForUser(userEmail: string) {
-  await ensureConciergeOrderTable();
   return db
     .select()
     .from(conciergeOrder)
-    .where(sql`${conciergeOrder.userEmail} = ${userEmail}`)
+    .where(eq(conciergeOrder.userEmail, userEmail))
     .orderBy(sql`"createdAt" DESC`);
 }
 
@@ -122,26 +83,23 @@ export async function getConciergeOrderForUser({
   id: string;
   userEmail: string;
 }) {
-  await ensureConciergeOrderTable();
   const [row] = await db
     .select()
     .from(conciergeOrder)
-    .where(sql`${conciergeOrder.id} = ${id} AND ${conciergeOrder.userEmail} = ${userEmail}`)
+    .where(and(eq(conciergeOrder.id, id), eq(conciergeOrder.userEmail, userEmail)))
     .limit(1);
   return row ?? null;
 }
 
 export async function listConciergeOrdersForAdmin() {
-  await ensureConciergeOrderTable();
   return db.select().from(conciergeOrder).orderBy(sql`"createdAt" DESC`);
 }
 
 export async function getConciergeOrderById(id: string) {
-  await ensureConciergeOrderTable();
   const [row] = await db
     .select()
     .from(conciergeOrder)
-    .where(sql`${conciergeOrder.id} = ${id}`)
+    .where(eq(conciergeOrder.id, id))
     .limit(1);
   return row ?? null;
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { listConciergeOrdersForUser } from "@/lib/db/queries";
-import { auth } from "@/auth";
+import { auth, signOut } from "@/auth";
 
 function formatDate(input: Date) {
   return new Intl.DateTimeFormat("ko-KR", {
@@ -13,6 +13,7 @@ function formatDate(input: Date) {
 export async function MyPageContent() {
   const session = await auth();
   const email = session?.user?.email;
+
   if (!email) {
     redirect("/mypage/login?callbackUrl=/mypage");
   }
@@ -34,12 +35,16 @@ export async function MyPageContent() {
             <Link href="/ai" className="h-10 px-4 inline-flex items-center border border-neutral-300 bg-white text-sm hover:bg-neutral-100">
               정장 맞추기
             </Link>
-            <a
-              href="/api/auth/signout?callbackUrl=/"
-              className="h-10 px-4 inline-flex items-center border border-neutral-300 bg-white text-sm hover:bg-neutral-100"
+            <form
+              action={async () => {
+                "use server";
+                await signOut();
+              }}
             >
-              로그아웃
-            </a>
+              <button className="h-10 px-4 inline-flex items-center border border-neutral-300 bg-white text-sm hover:bg-neutral-100" type="submit">
+                로그아웃
+              </button>
+            </form>
           </div>
         </div>
 

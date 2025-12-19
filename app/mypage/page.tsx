@@ -1,3 +1,4 @@
+import { signOut } from "@/auth";
 import { MyPageContent } from "@/components/mypage/mypage-content";
 import { SuspenseSkeleton } from "@/components/suspense-skeleton";
 import { Suspense } from "react";

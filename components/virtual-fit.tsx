@@ -50,9 +50,7 @@ export function VirtualFit() {
     <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr] md:items-start">
       <div className="space-y-4">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-          <p className="text-xs uppercase tracking-[0.22em] text-amber-200">
-            STEP 1 — 전신 사진 업로드
-          </p>
+          <p className="text-xs uppercase tracking-[0.22em] text-amber-200">STEP 1 — 전신 사진 업로드</p>
           <label className="mt-3 flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-white/25 bg-black/50 px-4 py-10 text-center text-sm text-white/70 transition hover:border-amber-200/80 hover:bg-black/40">
             <input
               className="hidden"
@@ -66,51 +64,34 @@ export function VirtualFit() {
                 setStatus("ready");
               }}
             />
-            <span className="rounded-full bg-amber-400 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-black">
-              Upload
-            </span>
+            <span className="rounded-full bg-amber-400 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-black">Upload</span>
             <span>전신이 보이는 정면 사진을 선택하세요.</span>
           </label>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-          <p className="text-xs uppercase tracking-[0.22em] text-amber-200">
-            STEP 2 — 아이템 선택
-          </p>
+          <p className="text-xs uppercase tracking-[0.22em] text-amber-200">STEP 2 — 아이템 선택</p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {(
-              [
-                ["셔츠", "shirt"] as const,
-                ["재킷", "jacket"] as const,
-                ["팬츠", "pants"] as const,
-                ["타이", "tie"] as const,
-              ] satisfies Array<[string, ItemType]>
-            ).map(([label, key]) => (
-              <div
-                key={key}
-                className="rounded-xl border border-white/10 bg-black/40 p-3"
+              [["셔츠", "shirt"] as const, ["재킷", "jacket"] as const, ["팬츠", "pants"] as const, ["타이", "tie"] as const] satisfies Array<
+                [string, ItemType]
               >
-                <p className="text-xs uppercase tracking-[0.18em] text-white/60">
-                  {label}
-                </p>
+            ).map(([label, key]) => (
+              <div key={key} className="rounded-xl border border-white/10 bg-black/40 p-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-white/60">{label}</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {palette[key].map((option) => (
                     <button
                       key={option.swatch}
                       type="button"
-                      onClick={() =>
-                        setSelection((prev) => ({ ...prev, [key]: option.swatch }))
-                      }
+                      onClick={() => setSelection((prev) => ({ ...prev, [key]: option.swatch }))}
                       className={`flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition ${
                         selection[key] === option.swatch
                           ? "border-amber-300 bg-amber-200/20 text-amber-50"
                           : "border-white/10 bg-white/5 text-white/70 hover:border-amber-200/60"
                       }`}
                     >
-                      <span
-                        className="h-4 w-4 rounded-full"
-                        style={{ background: option.swatch }}
-                      />
+                      <span className="h-4 w-4 rounded-full" style={{ background: option.swatch }} />
                       {option.label}
                     </button>
                   ))}
@@ -121,24 +102,16 @@ export function VirtualFit() {
         </div>
       </div>
 
-      <div className="rounded-[24px] border border-white/10 bg-white/5 p-4 backdrop-blur">
+      <div className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur">
         <div className="flex items-center justify-between">
-          <p className="text-xs uppercase tracking-[0.22em] text-white/60">
-            STEP 3 — 착장 프리뷰
-          </p>
-          <span className="rounded-full bg-amber-400 px-3 py-1 text-xs font-semibold text-black">
-            AI Compose
-          </span>
+          <p className="text-xs uppercase tracking-[0.22em] text-white/60">STEP 3 — 착장 프리뷰</p>
+          <span className="rounded-full bg-amber-400 px-3 py-1 text-xs font-semibold text-black">AI Compose</span>
         </div>
 
-        <div className="mt-4 aspect-[3/4] overflow-hidden rounded-[20px] border border-white/10 bg-gradient-to-b from-black via-zinc-900 to-black">
+        <div className="mt-4 aspect-3/4 overflow-hidden rounded-[20px] border border-white/10 bg-linear-to-b from-black via-zinc-900 to-black">
           {previewUrl ? (
             <div className="relative h-full w-full">
-              <img
-                src={previewUrl}
-                alt="업로드 프리뷰"
-                className="h-full w-full object-cover opacity-90"
-              />
+              <img src={previewUrl} alt="업로드 프리뷰" className="h-full w-full object-cover opacity-90" />
               <div className="pointer-events-none absolute inset-0 mix-blend-screen">
                 <div
                   className="absolute left-1/2 top-[30%] h-[22%] w-[48%] -translate-x-1/2 rounded-[18%] blur-[48px]"
@@ -152,23 +125,17 @@ export function VirtualFit() {
                   className="absolute left-1/2 top-[65%] h-[24%] w-[42%] -translate-x-1/2 rounded-[32%] blur-[52px]"
                   style={{ background: overlayStyle.pants }}
                 />
-                <div
-                  className="absolute left-1/2 top-[38%] h-[18%] w-[8%] -translate-x-1/2 rounded-[16px] blur-[32px]"
-                  style={{ background: overlayStyle.tie }}
-                />
+                <div className="absolute left-1/2 top-[38%] h-[18%] w-[8%] -translate-x-1/2 rounded-2xl blur-[32px]" style={{ background: overlayStyle.tie }} />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-black/10" />
             </div>
           ) : (
-            <div className="flex h-full items-center justify-center text-sm text-white/60">
-              전신 사진을 업로드하면 착장 프리뷰가 표시됩니다.
-            </div>
+            <div className="flex h-full items-center justify-center text-sm text-white/60">전신 사진을 업로드하면 착장 프리뷰가 표시됩니다.</div>
           )}
         </div>
 
         <p className="mt-3 text-xs text-white/60">
-          시연용 합성입니다. 실제 AI 파이프라인 연동 시 고객 사진을 비공개
-          Blob에 저장하고, 선택한 룩으로 자동 합성해 제공합니다.
+          시연용 합성입니다. 실제 AI 파이프라인 연동 시 고객 사진을 비공개 Blob에 저장하고, 선택한 룩으로 자동 합성해 제공합니다.
         </p>
 
         <button

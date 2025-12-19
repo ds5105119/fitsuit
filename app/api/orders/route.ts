@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getUserSession } from "@/lib/auth/user-session";
+import { auth } from "@/auth";
 import { listConciergeOrdersForUser, saveConciergeOrder } from "@/lib/db/queries";
 
 function isValidDataUrlOrUrl(input: unknown) {
@@ -11,7 +11,7 @@ function isValidDataUrlOrUrl(input: unknown) {
 }
 
 export async function GET() {
-  const session = await getUserSession();
+  const session = await auth();
   const email = session?.user?.email;
   if (!email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -22,7 +22,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const session = await getUserSession();
+  const session = await auth();
   const email = session?.user?.email;
   if (!email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -70,4 +70,3 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ order: inserted }, { status: 201 });
 }
-

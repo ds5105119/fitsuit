@@ -18,8 +18,6 @@ export async function POST(req: Request) {
       })
       .join(", ");
 
-    console.log(summary);
-
     const prompt = `
 You are an image editor and stylist.
 
@@ -88,9 +86,7 @@ If any check fails, correct the image so that it fully follows the rules above.`
     const result = await ai.models.generateContent({
       model: "gemini-2.5-flash-image",
       contents,
-      config: {
-        responseModalities: ["TEXT", "IMAGE"],
-      },
+      config: { responseModalities: ["IMAGE"] },
     });
 
     const firstPart = result.candidates?.[0]?.content?.parts?.[0] as { text?: string } | { inlineData?: { data: string; mimeType?: string } } | undefined;

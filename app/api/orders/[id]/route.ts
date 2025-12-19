@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { getUserSession } from "@/lib/auth/user-session";
+import { auth } from "@/auth";
 import { getConciergeOrderForUser } from "@/lib/db/queries";
 
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getUserSession();
+  const session = await auth();
   const email = session?.user?.email;
   if (!email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -20,4 +20,3 @@ export async function GET(
 
   return NextResponse.json({ order });
 }
-
