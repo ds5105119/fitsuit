@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import {
-  ensureAdminUser,
   setAdminSession,
   verifyAdminCredentials,
 } from "@/lib/auth/admin";
@@ -15,7 +14,6 @@ export async function POST(request: Request) {
     );
   }
 
-  await ensureAdminUser();
   const ok = await verifyAdminCredentials(username, password);
 
   if (!ok) {
