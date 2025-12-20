@@ -47,7 +47,9 @@ export default async function MypageLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  <Suspense fallback={<SuspenseSkeleton />}>
-    <MypageLayoutLoader>{children}</MypageLayoutLoader>
-  </Suspense>;
+  return (
+    <Suspense fallback={<SuspenseSkeleton />}>
+      <MypageLayoutLoader>{children}</MypageLayoutLoader>
+    </Suspense>
+  );
 }

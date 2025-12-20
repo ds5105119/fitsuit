@@ -19,7 +19,7 @@ function formatPrice(price: number | null) {
   return `${new Intl.NumberFormat("ko-KR").format(price)}원`;
 }
 
-export async function OrderDetailContent({ id }: { id: string }) {
+export async function OrderDetail({ id }: { id: string }) {
   const session = await auth();
   const email = session?.user?.email;
 

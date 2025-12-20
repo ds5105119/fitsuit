@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { OrderDetailContent } from "@/components/mypage/order-detail-content";
+import { OrderDetail } from "@/components/mypage/mypage-order-detail";
 import { SuspenseSkeleton } from "@/components/suspense-skeleton";
 
 export const metadata = {
@@ -8,10 +8,10 @@ export const metadata = {
 
 async function OrderDetailIdLoader({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <OrderDetailContent id={id} />;
+  return <OrderDetail id={id} />;
 }
 
-export default function OrderDetail({ params }: { params: Promise<{ id: string }> }) {
+export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   return (
     <Suspense fallback={<SuspenseSkeleton />}>
       <OrderDetailIdLoader params={params} />
