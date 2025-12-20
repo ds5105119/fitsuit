@@ -16,14 +16,8 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar collapsible="icon" className="w-56">
-      <SidebarHeader className="px-4 py-6">
-        <div className="space-y-1">
-          <p className="text-xs font-semibold tracking-[0.2em] text-neutral-500">ADMIN</p>
-          <h1 className="text-lg font-bold text-neutral-900">GOLD FINGER</h1>
-          <p className="text-sm text-neutral-500">컨시어지 & 문의 관리</p>
-        </div>
-      </SidebarHeader>
+    <Sidebar collapsible="icon">
+      <SidebarHeader className="px-4 py-6"></SidebarHeader>
       <SidebarSeparator />
       <SidebarContent>
         <NavMain items={NAV_ITEMS} />

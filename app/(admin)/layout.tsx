@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { AdminSidebar } from "@/components/admin/sidebar/sidebar";
 import { Suspense } from "react";
 import { SessionProvider } from "next-auth/react";
 
 import "../globals.css";
+import Header from "@/components/admin/sidebar/sidebar-header";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://goldfinger-tailor.com"),
@@ -57,7 +58,8 @@ export default function RootLayout({
             <Suspense fallback={null}>
               <AdminSidebar />
             </Suspense>
-            <SidebarInset className="md:ml-56">
+            <SidebarInset>
+              <Header />
               <main className="flex w-full scrollbar-hide break-keep">{children}</main>
             </SidebarInset>
           </SidebarProvider>
