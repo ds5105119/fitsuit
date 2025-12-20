@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { PreviewPane } from "./preview-pane";
 import { TabStrip } from "./tab-strip";
 import { UploadPanel } from "./upload-panel";
@@ -9,8 +10,23 @@ import { SummaryView } from "./summary-view";
 import { buildInitialSelections, catalog, categoryOrder, tabs } from "./data";
 import type { CategoryKey, ConfigOption, Preset, SelectionState, WearCategory } from "./types";
 import { isValidImageSrc, normalizeToFourThree } from "./utils";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+const STORAGE_KEY = "ai-configurator-state";
+const STORAGE_PREVIEW_KEY = "ai-configurator-preview-latest";
 
 export function AIConfigurator() {
+  const searchParams = useSearchParams();
+  const restoredPreviewRef = useRef<string | null>(null);
+  const hydratedRef = useRef(false);
   const [activeTab, setActiveTab] = useState<CategoryKey>("사진 업로드");
   const [activeGroup, setActiveGroup] = useState<Partial<Record<WearCategory, string | null>>>({});
   const [presetOpen, setPresetOpen] = useState(false);
@@ -180,6 +196,110 @@ export function AIConfigurator() {
     return () => cancelAnimationFrame(id);
   }, [activePreset, presets]);
 
+  // Restore saved state after returning from login
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const snapRaw = sessionStorage.getItem(STORAGE_PREVIEW_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      const previewSnap = snapRaw ? JSON.parse(snapRaw) : null;
+
+      if (parsed?.activeTab) setActiveTab(parsed.activeTab);
+      if (parsed?.activeGroup) setActiveGroup(parsed.activeGroup);
+      if (parsed?.selected) setSelected(parsed.selected);
+      if (Array.isArray(parsed?.presets)) setPresets(parsed.presets);
+      if (typeof parsed?.userImage === "string" || parsed?.userImage === null) setUserImage(parsed.userImage);
+      if (typeof parsed?.originalUpload === "string" || parsed?.originalUpload === null) setOriginalUpload(parsed.originalUpload);
+      if (typeof parsed?.backgroundPreview === "string" || parsed?.backgroundPreview === null) setBackgroundPreview(parsed.backgroundPreview);
+
+      const restoredPreset = typeof parsed?.activePreset === "number" ? parsed.activePreset : 0;
+      setActivePreset(restoredPreset);
+
+      const owner = typeof parsed?.previewOwner === "number" ? parsed.previewOwner : restoredPreset;
+      setPreviewOwner(owner);
+
+      const bestPreview =
+        (Array.isArray(parsed?.presets) && parsed.presets[owner]?.previewUrl) ||
+        (typeof parsed?.previewUrl === "string" && parsed.previewUrl) ||
+        (Array.isArray(parsed?.presets) && parsed.presets[restoredPreset]?.previewUrl) ||
+        null;
+
+      const previewToUse = previewSnap?.url || bestPreview;
+      const ownerToUse = typeof previewSnap?.owner === "number" ? previewSnap.owner : owner;
+
+      if (previewToUse) {
+        setPreviewUrl(previewToUse);
+        restoredPreviewRef.current = previewToUse;
+        setPreviewOwner(ownerToUse);
+        setPresets((prev) =>
+          prev.map((p, idx) => (idx === ownerToUse ? { ...p, previewUrl: previewToUse || p.previewUrl } : p))
+        );
+      }
+
+      if (parsed?.viewMode === "summary" || parsed?.viewMode === "config") setViewMode(parsed.viewMode);
+    } catch {
+      // ignore bad cache
+    }
+    hydratedRef.current = true;
+  }, []);
+
+  useEffect(() => {
+    // If we restored a preview but lost it during hydration, reapply it
+    if (!previewUrl && restoredPreviewRef.current) {
+      setPreviewUrl(restoredPreviewRef.current);
+      setPresets((prev) => prev.map((p, idx) => (idx === activePreset ? { ...p, previewUrl: restoredPreviewRef.current ?? p.previewUrl } : p)));
+    }
+  }, [previewUrl, activePreset]);
+
+  useEffect(() => {
+    // If previewUrl is empty but current preset has a stored preview, use it
+    const candidate = presets?.[activePreset]?.previewUrl;
+    if (!previewUrl && candidate) {
+      setPreviewUrl(candidate);
+      setPreviewOwner(activePreset);
+    }
+  }, [previewUrl, presets, activePreset]);
+
+  // If redirected back from login with ?view=summary keep summary view open
+  useEffect(() => {
+    const view = searchParams?.get("view");
+    if (view === "summary") {
+      setViewMode("summary");
+    }
+  }, [searchParams]);
+
+  // Persist state so it survives auth redirects
+  useEffect(() => {
+    const payload = {
+      activeTab,
+      activeGroup,
+      selected,
+      presets,
+      previewUrl,
+      previewOwner,
+      userImage,
+      originalUpload,
+      backgroundPreview,
+      activePreset,
+      viewMode,
+    };
+    if (hydratedRef.current) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch {
+        // ignore quota errors
+      }
+      try {
+        sessionStorage.setItem(
+          STORAGE_PREVIEW_KEY,
+          JSON.stringify({ url: previewUrl, owner: previewOwner })
+        );
+      } catch {
+        // ignore
+      }
+    }
+  }, [activeTab, activeGroup, selected, presets, previewUrl, previewOwner, userImage, originalUpload, backgroundPreview, activePreset, viewMode]);
+
   const generatePreview = async () => {
     if (loading) return;
     if (!userImage) {
@@ -346,13 +466,3 @@ export function AIConfigurator() {
     </section>
   );
 }
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";

@@ -2,6 +2,9 @@ import { and, eq, sql } from "drizzle-orm";
 import { db } from "./client";
 import { conciergeOrder, inquiry } from "./schema";
 
+export const ORDER_STATUSES = ["접수", "취소", "제작중", "완료"] as const;
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
+
 export type NewInquiry = {
   name: string;
   email: string;
@@ -101,5 +104,42 @@ export async function getConciergeOrderById(id: string) {
     .from(conciergeOrder)
     .where(eq(conciergeOrder.id, id))
     .limit(1);
+  return row ?? null;
+}
+
+export async function deleteConciergeOrderById(id: string) {
+  const [row] = await db
+    .delete(conciergeOrder)
+    .where(eq(conciergeOrder.id, id))
+    .returning({
+      id: conciergeOrder.id,
+      previewUrl: conciergeOrder.previewUrl,
+      originalUpload: conciergeOrder.originalUpload,
+      backgroundPreview: conciergeOrder.backgroundPreview,
+    });
+
+  return row ?? null;
+}
+
+export async function updateConciergeOrderStatus({
+  id,
+  status,
+  userEmail,
+}: {
+  id: string;
+  status: OrderStatus;
+  userEmail?: string;
+}) {
+  const where =
+    typeof userEmail === "string"
+      ? and(eq(conciergeOrder.id, id), eq(conciergeOrder.userEmail, userEmail))
+      : eq(conciergeOrder.id, id);
+
+  const [row] = await db
+    .update(conciergeOrder)
+    .set({ status })
+    .where(where)
+    .returning();
+
   return row ?? null;
 }

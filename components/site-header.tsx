@@ -9,23 +9,14 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
-import { MyPageLoginDialog } from "@/components/mypage/mypage-login-dialog";
+import { LoginDialog } from "@/components/login-dialog";
 
-export const mainNav = [
-  { label: "정장 맞추기", href: "/ai" },
-  { label: "명장 소개", href: "/about" },
-  { label: "매장 안내", href: "/showroom" },
-  { label: "문의하기", href: "/contact" },
-];
-
-export const secondaryNav = [
-  { label: "사진 및 동영상", href: "/about" },
-  { label: "Works", href: "/showroom" },
-];
+import { mainNav, secondaryNav } from "@/lib/constants";
+import { useScroll } from "@/hooks/use-scroll";
 
 export function SiteHeader() {
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const isScrolled = useScroll(40);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { status } = useSession();
@@ -33,33 +24,20 @@ export function SiteHeader() {
   const [loginOpen, setLoginOpen] = useState(false);
   const isHome = pathname === "/";
   const callbackUrl = `${pathname}${searchParams?.toString() ? `?${searchParams.toString()}` : ""}`;
+  const scrolled = !isHome || isScrolled;
 
   useEffect(() => {
     setSheetOpen(false);
   }, [pathname]);
 
   useEffect(() => {
-    if (!isHome) {
-      setScrolled(true);
-      return;
+    if (status === "unauthenticated" && pathname?.startsWith("/ai")) {
+      setLoginOpen(true);
     }
+  }, [status, pathname]);
 
-    const updateScrolled = () => {
-      const canScroll = document.documentElement.scrollHeight - window.innerHeight > 8;
-      setScrolled(!canScroll ? false : window.scrollY > 40);
-    };
-
-    updateScrolled();
-    window.addEventListener("scroll", updateScrolled);
-    window.addEventListener("resize", updateScrolled);
-    return () => {
-      window.removeEventListener("scroll", updateScrolled);
-      window.removeEventListener("resize", updateScrolled);
-    };
-  }, [isHome]);
-
-  const toneClass = scrolled || !isHome ? "text-neutral-900" : "text-white";
-  const headerBg = scrolled || !isHome ? "bg-white/70 text-neutral-900 shadow-[0_20px_80px_rgba(0,0,0,0.08)] backdrop-blur-md" : "bg-transparent";
+  const toneClass = scrolled ? "text-neutral-900" : "text-white";
+  const headerBg = scrolled ? "bg-white/70 text-neutral-900 shadow-[0_20px_80px_rgba(0,0,0,0.08)] backdrop-blur-md" : "bg-transparent";
 
   return (
     <>
@@ -94,7 +72,7 @@ export function SiteHeader() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     {isAuthed ? (
-                      <Link href="/mypage">
+                      <Link href="/mypage/orders">
                         <UserIcon size="1.2rem" />
                       </Link>
                     ) : (
@@ -138,7 +116,7 @@ export function SiteHeader() {
             </div>
 
             {isAuthed ? (
-              <Link href="/mypage" className="lg:hidden" aria-label="마이페이지">
+              <Link href="/mypage/orders" className="lg:hidden" aria-label="마이페이지">
                 <UserIcon />
               </Link>
             ) : (
@@ -151,7 +129,7 @@ export function SiteHeader() {
               <SheetTrigger>
                 <Menu className="lg:hidden" />
               </SheetTrigger>
-              <SheetContent side="left" showClose={false} className="w-full sm:max-w-md p-0">
+              <SheetContent side="left" className="w-full sm:max-w-md p-0">
                 <SheetHeader className="sr-only">
                   <SheetTitle />
                   <SheetDescription />
@@ -186,7 +164,7 @@ export function SiteHeader() {
           </div>
         </div>
       </header>
-      <MyPageLoginDialog open={loginOpen} onOpenChange={setLoginOpen} callbackUrl={callbackUrl} onCloseHref="" />
+      <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} callbackUrl={callbackUrl} onCloseHref="" />
     </>
   );
 }

@@ -5,9 +5,12 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, useInView } from "framer-motion";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 import type { ConfigOption, WearCategory } from "./types";
 import { TicketsIcon, XIcon } from "lucide-react";
 import { Button } from "../ui/button";
+import { LoginDialog } from "@/components/login-dialog";
 
 type SummaryViewProps = {
   previewUrl: string;
@@ -20,6 +23,7 @@ type SummaryViewProps = {
 
 export function SummaryView({ previewUrl, backgroundPreview, originalUpload, summaryItems, onEdit, onSelectOption }: SummaryViewProps) {
   const router = useRouter();
+  const { status } = useSession();
   const hero = previewUrl || backgroundPreview || originalUpload || "";
   const visibleCats: WearCategory[] = ["원단", "재킷", "바지", "셔츠"];
   const filtered = summaryItems.filter(([cat]) => visibleCats.includes(cat));
@@ -48,7 +52,29 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
   const filledCount = Object.values(measurements).filter(Boolean).length;
 
   const [orderSubmitting, setOrderSubmitting] = useState(false);
-  const [orderError, setOrderError] = useState<string | null>(null);
+  const [loginOpen, setLoginOpen] = useState(false);
+
+  // Restore measurements when returning after auth redirect
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("ai-configurator-measurements");
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        setMeasurements((prev) => ({ ...prev, ...parsed }));
+      }
+    } catch {
+      // ignore cache errors
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("ai-configurator-measurements", JSON.stringify(measurements));
+    } catch {
+      // ignore quota errors
+    }
+  }, [measurements]);
 
   const handleMeasurementChange = (key: MeasurementKey, value: string) => {
     setMeasurements((prev) => ({ ...prev, [key]: value }));
@@ -61,7 +87,6 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
   const submitOrder = async () => {
     if (orderSubmitting) return;
     setOrderSubmitting(true);
-    setOrderError(null);
 
     const cleanedMeasurements = Object.fromEntries(
       Object.entries(measurements)
@@ -84,9 +109,7 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           selections,
-          measurements: Object.keys(cleanedMeasurements).length
-            ? cleanedMeasurements
-            : null,
+          measurements: Object.keys(cleanedMeasurements).length ? cleanedMeasurements : null,
           previewUrl: previewUrl || null,
           originalUpload: originalUpload || null,
           backgroundPreview: backgroundPreview || null,
@@ -94,26 +117,30 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
       });
 
       if (res.status === 401) {
-        setOrderError("로그인 후 주문 전송이 가능합니다.");
-        router.push(`/mypage/login?callbackUrl=${encodeURIComponent("/ai")}`);
+        toast.error("로그인 후 주문 전송이 가능합니다.");
+        setLoginOpen(true);
         return;
       }
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setOrderError(data?.error || "주문 전송에 실패했습니다.");
+        const message = data?.error || "주문 전송에 실패했습니다.";
+        toast.error(message);
         return;
       }
 
       const orderId = data?.order?.id;
       if (typeof orderId === "string") {
+        toast.success("주문이 전송되었습니다.");
         router.push(`/mypage/orders/${orderId}`);
         return;
       }
 
+      toast.success("주문이 전송되었습니다.");
       router.push("/mypage");
     } catch (e: any) {
-      setOrderError(e?.message || "주문 전송 중 오류가 발생했습니다.");
+      const message = e?.message || "주문 전송 중 오류가 발생했습니다.";
+      toast.error(message);
     } finally {
       setOrderSubmitting(false);
     }
@@ -135,6 +162,14 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
   const ctaInView = useInView(ctaRef, {
     margin: "0px 0px -100px 0px",
   });
+
+  const handleOrderClick = () => {
+    if (status === "authenticated") {
+      submitOrder();
+    } else {
+      setLoginOpen(true);
+    }
+  };
 
   return (
     <section className="h-full w-full bg-white">
@@ -195,7 +230,7 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
                   </button>
                 </SheetTrigger>
 
-                <SheetContent side="right" className="w-full min-w-full lg:min-w-lg lg:max-w-lg p-0 bg-neutral-100" showClose={false}>
+                <SheetContent side="right" className="w-full min-w-full lg:min-w-lg lg:max-w-lg p-0 bg-neutral-100">
                   <SheetHeader className="sr-only">
                     <SheetTitle>신체 사이즈 입력</SheetTitle>
                     <SheetDescription>정확한 맞춤을 위해 치수를 입력해 주세요.</SheetDescription>
@@ -256,10 +291,9 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
               <Button variant="outline" onClick={onEdit}>
                 계속 편집
               </Button>
-              <Button onClick={submitOrder} disabled={orderSubmitting}>
+              <Button onClick={handleOrderClick} disabled={orderSubmitting}>
                 {orderSubmitting ? "전송 중..." : "컨시어지 주문 전송"}
               </Button>
-              {orderError ? <p className="text-xs text-red-600">{orderError}</p> : null}
             </div>
           </div>
         </div>
@@ -281,12 +315,13 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
 
           <div className="flex space-x-2">
             <Button variant="outline">Finish in-store</Button>
-            <Button onClick={submitOrder} disabled={orderSubmitting}>
+            <Button onClick={handleOrderClick} disabled={orderSubmitting}>
               {orderSubmitting ? "전송 중..." : "컨시어지 주문 전송"}
             </Button>
           </div>
         </div>
       </motion.div>
+      <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} callbackUrl="/ai?view=summary" onCloseHref="" />
     </section>
   );
 }

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { listConciergeOrdersForUser } from "@/lib/db/queries";
 import { auth, signOut } from "@/auth";
+import { cn } from "@/lib/utils";
+import MyPageSidebar from "./mypage-sidebar";
 
 function formatDate(input: Date) {
   return new Intl.DateTimeFormat("ko-KR", {
@@ -21,50 +23,34 @@ export async function MyPageContent() {
   const orders = await listConciergeOrdersForUser(email);
 
   return (
-    <main className="mt-16 lg:mt-20 min-h-[calc(100vh-4rem)] bg-neutral-50 text-neutral-900">
-      <div className="mx-auto max-w-6xl px-6 py-10">
-        <div className="flex items-start justify-between border-b border-neutral-200 pb-4">
-          <div>
-            <p className="text-xs tracking-[0.24em] text-neutral-500">MY</p>
-            <h1 className="text-2xl font-bold">마이페이지</h1>
-            <p className="mt-1 text-sm text-neutral-600">
-              {session?.user?.name ? `${session.user.name}님` : "고객님"} ({email})
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/ai" className="h-10 px-4 inline-flex items-center border border-neutral-300 bg-white text-sm hover:bg-neutral-100">
-              정장 맞추기
-            </Link>
-            <form
-              action={async () => {
-                "use server";
-                await signOut();
-              }}
-            >
-              <button className="h-10 px-4 inline-flex items-center border border-neutral-300 bg-white text-sm hover:bg-neutral-100" type="submit">
-                로그아웃
-              </button>
-            </form>
-          </div>
-        </div>
+    <main className="mt-16 lg:mt-20 min-h-[calc(100vh-4rem)] bg-white text-neutral-900">
+      <div className="mx-auto h-full max-w-6xl px-6 py-10">
+        <div className="mt-8 flex space-x-10">
+          <MyPageSidebar orders={orders} />
 
-        <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[220px_minmax(0,1fr)]">
-          <aside className="border-t border-neutral-200 bg-white">
-            <div className="border-b border-neutral-200 px-4 py-4">
-              <p className="text-sm font-semibold">마이페이지 메뉴</p>
+          <section className="grow">
+            <div className="flex items-start justify-between border-b border-neutral-200 pb-4">
+              <div>
+                <p className="text-xs tracking-[0.24em] text-neutral-500">MY</p>
+                <h1 className="text-2xl font-bold">마이페이지</h1>
+                <p className="mt-1 text-sm text-neutral-600">
+                  {session?.user?.name ? `${session.user.name}님` : "고객님"} ({email})
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <form
+                  action={async () => {
+                    "use server";
+                    await signOut();
+                  }}
+                >
+                  <button className="h-10 px-4 inline-flex items-center border border-neutral-300 bg-white text-sm hover:bg-neutral-100" type="submit">
+                    로그아웃
+                  </button>
+                </form>
+              </div>
             </div>
-            <nav className="px-2 py-2 text-sm">
-              <Link href="/mypage" className="flex items-center justify-between px-2 py-3 hover:bg-neutral-100">
-                <span>주문/배송 조회</span>
-                <span className="text-xs text-neutral-500">{orders.length}</span>
-              </Link>
-              <div className="px-2 py-3 text-neutral-400">회원정보 (준비중)</div>
-              <div className="px-2 py-3 text-neutral-400">배송지 관리 (준비중)</div>
-              <div className="px-2 py-3 text-neutral-400">1:1 문의 (준비중)</div>
-            </nav>
-          </aside>
 
-          <section className="border-t border-neutral-200 bg-white">
             <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-4">
               <div>
                 <p className="text-sm font-semibold">주문/배송 조회</p>

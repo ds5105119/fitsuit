@@ -1,8 +1,10 @@
 import Link from "next/link";
 import NextImage from "next/image";
 import { notFound, redirect } from "next/navigation";
-import { getConciergeOrderForUser } from "@/lib/db/queries";
+import { getConciergeOrderById } from "@/lib/db/queries";
 import { auth } from "@/auth";
+import { Suspense } from "react";
+import { OrderCancelButton } from "@/components/mypage/order-cancel-button";
 
 function formatDate(input: Date) {
   return new Intl.DateTimeFormat("ko-KR", {
@@ -11,16 +13,46 @@ function formatDate(input: Date) {
   }).format(input);
 }
 
-export async function OrderDetailContent({ params }: { params: Promise<{ id: string }> }) {
+type Props = {
+  id: string;
+  fallback?: React.ReactNode;
+};
+
+export function OrderDetailContent({ id, fallback }: Props) {
+  return (
+    <Suspense fallback={fallback ?? null}>
+      <OrderDetailContentInner id={id} />
+    </Suspense>
+  );
+}
+
+async function OrderDetailContentInner({ id }: { id: string }) {
   const session = await auth();
   const email = session?.user?.email;
   if (!email) {
-    redirect("/mypage/login?callbackUrl=/mypage");
+    redirect("/mypage/orders");
   }
 
-  const { id } = await params;
-  const order = await getConciergeOrderForUser({ id, userEmail: email });
-  if (!order) notFound();
+  if (!id) {
+    redirect("/mypage/orders");
+  }
+
+  let order = null;
+  try {
+    order = await getConciergeOrderById(id);
+  } catch (error) {
+    console.error("Failed to load order", error);
+    redirect("/mypage/orders");
+  }
+
+  if (!order) {
+    redirect("/mypage/orders");
+  }
+
+  // Block access to other users' orders
+  if (order.userEmail && order.userEmail !== email) {
+    redirect("/mypage/orders");
+  }
 
   const selections = Array.isArray(order.selections) ? order.selections : [];
   const rawMeasurements = order.measurements && typeof order.measurements === "object" ? (order.measurements as Record<string, string>) : null;
@@ -40,7 +72,7 @@ export async function OrderDetailContent({ params }: { params: Promise<{ id: str
               주문번호 {order.id.slice(0, 8).toUpperCase()} · {formatDate(new Date(order.createdAt))}
             </p>
           </div>
-          <Link href="/mypage" className="text-sm text-neutral-600 hover:underline">
+          <Link href="/mypage/orders" className="text-sm text-neutral-600 hover:underline">
             ← 주문 목록
           </Link>
         </div>
@@ -63,6 +95,10 @@ export async function OrderDetailContent({ params }: { params: Promise<{ id: str
                 <div className="flex justify-between py-1">
                   <span className="text-neutral-500">진행상태</span>
                   <span className="font-semibold">{order.status}</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span className="text-neutral-500">취소</span>
+                  <OrderCancelButton orderId={order.id} status={order.status} />
                 </div>
                 <div className="flex justify-between py-1">
                   <span className="text-neutral-500">고객</span>

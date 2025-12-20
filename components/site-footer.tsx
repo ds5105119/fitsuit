@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FacebookIcon, InstagramIcon, Mail, Phone } from "lucide-react";
-import { mainNav, secondaryNav } from "@/components/site-header";
+import { mainNav, secondaryNav } from "@/lib/constants";
 
 const policyLinks = [
   { label: "쿠키 설정", href: "/legal/cookies" },
