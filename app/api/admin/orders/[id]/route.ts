@@ -3,6 +3,9 @@ import { del } from "@vercel/blob";
 import { getAdminSession } from "@/lib/auth/admin";
 import { deleteConciergeOrderById, getConciergeOrderById, ORDER_STATUSES, updateConciergeOrderById } from "@/lib/db/queries";
 
+const isOrderStatus = (value: string): value is (typeof ORDER_STATUSES)[number] =>
+  ORDER_STATUSES.includes(value as (typeof ORDER_STATUSES)[number]);
+
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getAdminSession();
   if (!session) {
@@ -27,11 +30,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const body = await req.json().catch(() => null);
   const hasStatus = body && Object.prototype.hasOwnProperty.call(body, "status");
   const status = body?.status;
-  if (hasStatus && typeof status !== "string") {
-    return NextResponse.json({ error: "잘못된 상태입니다." }, { status: 400 });
-  }
-  if (typeof status === "string" && !ORDER_STATUSES.includes(status)) {
-    return NextResponse.json({ error: "잘못된 상태입니다." }, { status: 400 });
+  let nextStatus: (typeof ORDER_STATUSES)[number] | undefined = undefined;
+  if (hasStatus) {
+    if (typeof status !== "string" || !isOrderStatus(status)) {
+      return NextResponse.json({ error: "잘못된 상태입니다." }, { status: 400 });
+    }
+    nextStatus = status;
   }
 
   const hasPrice = body && Object.prototype.hasOwnProperty.call(body, "price");
@@ -54,7 +58,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const { id } = await params;
   const updated = await updateConciergeOrderById({
     id,
-    status: typeof status === "string" ? status : undefined,
+    status: nextStatus,
     price,
   });
   if (!updated) {

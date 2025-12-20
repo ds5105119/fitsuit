@@ -56,7 +56,7 @@ export async function OrderDetail({ id }: { id: string }) {
 
   return (
     <section className="flex-1">
-      <div className="flex items-center justify-between pb-4">
+      <div className="w-full flex flex-col space-y-2 lg:flex-row lg:space-y-0 lg:justify-between lg:items-center pb-4">
         <p className="text-lg font-bold">주문/배송 상세</p>
         <Link href="/mypage/orders" className="text-sm text-neutral-600 hover:underline">
           ← 주문 목록
