@@ -96,7 +96,10 @@ export async function MyPageContent() {
                 />
                 <Link
                   href={`/mypage/orders/${order.id}`}
-                  className="col-span-1 flex items-center justify-center text-sm font-semibold shadow-[inset_0_0_0_1px_var(--color-sky-500)] py-2 lg:w-36 rounded-md hover:bg-sky-100 text-sky-500"
+                  className={cn(
+                    "col-span-1 hidden items-center justify-center text-sm font-semibold shadow-[inset_0_0_0_1px_var(--color-sky-500)] py-2 lg:w-36 rounded-md hover:bg-sky-100 text-sky-500",
+                    order.status !== "취소" && "flex!"
+                  )}
                 >
                   문의하기
                 </Link>

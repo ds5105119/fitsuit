@@ -35,15 +35,17 @@ export default function MyPageSidebar({
 
   return (
     <aside className="w-60 hidden lg:block mr-10">
-      <div className="px-3 py-3 border-neutral-200 border-[1.2px] rounded-lg bg-blue-50">
-        <div className="flex items-center justify-between">
-          <p className="font-bold">
-            {displayName}
-            <span className="font-normal">님</span>
-          </p>
-          <ChevronRightIcon className="size-5 text-neutral-500" />
+      <Link href="/mypage/modify">
+        <div className="px-3 py-3 border-neutral-200 border-[1.2px] rounded-lg bg-blue-50">
+          <div className="flex items-center justify-between">
+            <p className="font-bold">
+              {displayName}
+              <span className="font-normal">님</span>
+            </p>
+            <ChevronRightIcon className="size-5 text-neutral-500" />
+          </div>
         </div>
-      </div>
+      </Link>
 
       <div className="border-b border-neutral-200 px-4 py-4">
         <p className="text-sm font-semibold">마이페이지 메뉴</p>
