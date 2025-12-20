@@ -12,6 +12,7 @@ type ConciergeOrder = {
   userEmail: string;
   userName: string | null;
   status: string;
+  price: number | null;
   selections: any;
   measurements: any;
   previewUrl: string | null;
@@ -28,7 +29,9 @@ export function AdminOrderDetail({ orderId }: { orderId: string }) {
   const router = useRouter();
   const [state, setState] = useState<State>({ status: "loading" });
   const [deleting, setDeleting] = useState(false);
-  const statuses = ["접수", "취소", "제작중", "완료"];
+  const [priceInput, setPriceInput] = useState("");
+  const [priceSaving, setPriceSaving] = useState(false);
+  const statuses = ["접수", "취소", "제작중", "견적 완료", "완료"];
 
   useEffect(() => {
     const load = async () => {
@@ -48,6 +51,12 @@ export function AdminOrderDetail({ orderId }: { orderId: string }) {
     };
     load();
   }, [orderId, router]);
+
+  useEffect(() => {
+    if (state.status === "ready") {
+      setPriceInput(state.order.price == null ? "" : String(state.order.price));
+    }
+  }, [state]);
 
   const formatter = useMemo(
     () =>
@@ -102,6 +111,44 @@ export function AdminOrderDetail({ orderId }: { orderId: string }) {
     }
     toast.success("상태가 변경되었습니다.");
     setState({ status: "ready", order: data.order });
+  };
+
+  const updatePrice = async () => {
+    if (state.status !== "ready" || priceSaving) return;
+
+    const trimmed = priceInput.trim();
+    let nextPrice: number | null;
+
+    if (!trimmed) {
+      nextPrice = null;
+    } else {
+      const parsed = Number(trimmed);
+      if (!Number.isFinite(parsed) || parsed < 0 || !Number.isInteger(parsed)) {
+        toast.error("0 이상의 정수 금액을 입력해 주세요.");
+        return;
+      }
+      nextPrice = parsed;
+    }
+
+    setPriceSaving(true);
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ price: nextPrice }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        toast.error(data?.error || "금액 저장에 실패했습니다.");
+        return;
+      }
+      toast.success("견적 금액이 저장되었습니다.");
+      setState({ status: "ready", order: data.order });
+    } catch (error) {
+      toast.error("금액 저장 중 오류가 발생했습니다.");
+    } finally {
+      setPriceSaving(false);
+    }
   };
 
   const deleteOrder = async () => {
@@ -197,6 +244,30 @@ export function AdminOrderDetail({ orderId }: { orderId: string }) {
                     </option>
                   ))}
                 </select>
+              </div>
+              <div className="flex items-center justify-between py-2 gap-2">
+                <div className="text-neutral-600">견적 금액</div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    step={1000}
+                    value={priceInput}
+                    onChange={(e) => setPriceInput(e.target.value)}
+                    placeholder="미정"
+                    className="h-9 w-28 rounded-md border border-neutral-300 bg-white px-2 text-sm text-neutral-900"
+                  />
+                  <span className="text-xs text-neutral-500">원</span>
+                  <button
+                    type="button"
+                    onClick={updatePrice}
+                    disabled={priceSaving}
+                    className="rounded-md border border-neutral-300 px-3 py-2 text-xs font-semibold text-neutral-700 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {priceSaving ? "저장 중..." : "저장"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

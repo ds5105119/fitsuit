@@ -12,7 +12,7 @@ export default function MyPageSidebar({
   orders,
   session,
 }: {
-  orders: {
+  orders?: {
     id: string;
     createdAt: Date;
     userEmail: string;
@@ -54,7 +54,7 @@ export default function MyPageSidebar({
             )}
           >
             <span>주문/배송 조회</span>
-            <span className="text-xs text-neutral-500">{orders.length}</span>
+            <span className="text-xs text-neutral-500">{orders?.length ?? ""}</span>
           </Link>
         </div>
 

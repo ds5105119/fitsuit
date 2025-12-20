@@ -1,0 +1,1 @@
+ALTER TABLE "ConciergeOrder" ADD COLUMN "price" integer;

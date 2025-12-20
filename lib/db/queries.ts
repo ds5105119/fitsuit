@@ -3,7 +3,7 @@ import { db } from "./client";
 import { conciergeOrder, inquiry } from "./schema";
 import { StoredSelections, WearCategory } from "@/components/ai-configurator/types";
 
-export const ORDER_STATUSES = ["접수", "취소", "제작중", "완료"] as const;
+export const ORDER_STATUSES = ["접수", "취소", "제작중", "견적 완료", "완료"] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 export type NewInquiry = {
@@ -26,6 +26,7 @@ export type ConciergeMeasurements = Record<string, string>;
 export type NewConciergeOrder = {
   userEmail: string;
   userName?: string | null;
+  price?: number | null;
   selections: ConciergeSelectionItem[];
   measurements?: ConciergeMeasurements | null;
   previewUrl?: string | null;
@@ -65,6 +66,7 @@ export async function saveConciergeOrder(data: NewConciergeOrder) {
       userEmail: data.userEmail,
       userName: data.userName ?? null,
       status: data.status ?? "접수",
+      price: data.price ?? null,
       selections,
       measurements: data.measurements ?? null,
       previewUrl: data.previewUrl ?? null,
@@ -147,6 +149,35 @@ export async function updateConciergeOrderStatus({
     .update(conciergeOrder)
     .set({ status })
     .where(where)
+    .returning();
+
+  return row ?? null;
+}
+
+export async function updateConciergeOrderById({
+  id,
+  status,
+  price,
+}: {
+  id: string;
+  status?: OrderStatus;
+  price?: number | null;
+}) {
+  const updates: Partial<typeof conciergeOrder.$inferInsert> = {};
+  if (typeof status === "string") {
+    updates.status = status;
+  }
+  if (price !== undefined) {
+    updates.price = price;
+  }
+  if (Object.keys(updates).length === 0) {
+    return null;
+  }
+
+  const [row] = await db
+    .update(conciergeOrder)
+    .set(updates)
+    .where(eq(conciergeOrder.id, id))
     .returning();
 
   return row ?? null;

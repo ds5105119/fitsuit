@@ -1,4 +1,4 @@
-import { jsonb, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { integer, jsonb, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import type { InferSelectModel } from "drizzle-orm";
 import { Measurements, StoredSelections } from "@/components/ai-configurator/types";
 
@@ -29,6 +29,7 @@ export const conciergeOrder = pgTable("ConciergeOrder", {
   userEmail: varchar("userEmail", { length: 160 }).notNull(),
   userName: varchar("userName", { length: 120 }),
   status: varchar("status", { length: 32 }).notNull().default("접수"),
+  price: integer("price"),
   selections: jsonb("selections").$type<StoredSelections>().notNull(),
   measurements: jsonb("measurements").$type<Measurements>(),
   previewUrl: text("previewUrl"),

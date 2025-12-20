@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { del } from "@vercel/blob";
 import { getAdminSession } from "@/lib/auth/admin";
-import { deleteConciergeOrderById, getConciergeOrderById, ORDER_STATUSES, updateConciergeOrderStatus } from "@/lib/db/queries";
+import { deleteConciergeOrderById, getConciergeOrderById, ORDER_STATUSES, updateConciergeOrderById } from "@/lib/db/queries";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getAdminSession();
@@ -26,12 +26,34 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const body = await req.json().catch(() => null);
   const status = body?.status;
-  if (!ORDER_STATUSES.includes(status)) {
+  const hasStatus = typeof status === typeof ORDER_STATUSES;
+  if (hasStatus && !ORDER_STATUSES.includes(status)) {
     return NextResponse.json({ error: "잘못된 상태입니다." }, { status: 400 });
   }
 
+  const hasPrice = body && Object.prototype.hasOwnProperty.call(body, "price");
+  let price: number | null | undefined = undefined;
+  if (hasPrice) {
+    const rawPrice = body?.price;
+    if (rawPrice === null) {
+      price = null;
+    } else if (typeof rawPrice === "number" && Number.isFinite(rawPrice) && rawPrice >= 0 && Number.isInteger(rawPrice)) {
+      price = rawPrice;
+    } else {
+      return NextResponse.json({ error: "잘못된 금액입니다." }, { status: 400 });
+    }
+  }
+
+  if (!hasStatus && !hasPrice) {
+    return NextResponse.json({ error: "변경할 항목이 없습니다." }, { status: 400 });
+  }
+
   const { id } = await params;
-  const updated = await updateConciergeOrderStatus({ id, status });
+  const updated = await updateConciergeOrderById({
+    id,
+    status: hasStatus ? status : undefined,
+    price,
+  });
   if (!updated) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

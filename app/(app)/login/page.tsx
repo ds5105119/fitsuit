@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { MyPageLoginContent } from "@/components/mypage/mypage-login-content";
+import { LoginForm } from "@/components/login-form";
 import { SuspenseSkeleton } from "@/components/suspense-skeleton";
 
 export const metadata = {
@@ -9,7 +9,7 @@ export const metadata = {
 export default function MyPageLogin({ searchParams }: { searchParams: Promise<{ callbackUrl?: string }> }) {
   return (
     <Suspense fallback={<SuspenseSkeleton />}>
-      <MyPageLoginContent searchParams={searchParams} />
+      <LoginForm searchParams={searchParams} />
     </Suspense>
   );
 }

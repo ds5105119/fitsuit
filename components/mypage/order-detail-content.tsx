@@ -12,10 +12,17 @@ function formatDate(input: Date) {
   }).format(input);
 }
 
+function formatPrice(price: number | null) {
+  if (typeof price !== "number" || !Number.isFinite(price)) {
+    return "견적 준비중";
+  }
+  return `${new Intl.NumberFormat("ko-KR").format(price)}원`;
+}
+
 export async function OrderDetailContent({ id }: { id: string }) {
   const session = await auth();
-
   const email = session?.user?.email;
+
   if (!email) {
     redirect("/mypage/orders");
   }
@@ -82,6 +89,10 @@ export async function OrderDetailContent({ id }: { id: string }) {
                 <div className="flex justify-between py-1">
                   <span className="text-neutral-500">진행상태</span>
                   <span className="font-semibold">{order.status}</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span className="text-neutral-500">견적 금액</span>
+                  <span className="font-semibold">{formatPrice(order.price)}</span>
                 </div>
                 <div className="flex justify-between py-1">
                   <span className="text-neutral-500">취소</span>
