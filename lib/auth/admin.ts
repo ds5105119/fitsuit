@@ -69,21 +69,57 @@ export async function verifyAdminCredentials(
   return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(user.passwordHash));
 }
 
-export async function updateAdminCredentials({
+export async function getAdminUserByUsername(username: string) {
+  const [user] = await db
+    .select()
+    .from(adminUser)
+    .where(eq(adminUser.username, username));
+  return user ?? null;
+}
+
+export async function listAdminUsers() {
+  return db.select().from(adminUser).orderBy(adminUser.createdAt);
+}
+
+export async function createAdminUser({
   username,
   password,
 }: {
   username: string;
   password: string;
 }) {
-   const [current] = await db.select().from(adminUser).limit(1);
-   if (!current) return;
-
   const { hash, salt } = hashPassword(password);
-  await db
+  const [row] = await db
+    .insert(adminUser)
+    .values({ username, passwordHash: hash, salt })
+    .returning();
+  return row ?? null;
+}
+
+export async function deleteAdminUser(username: string) {
+  const [row] = await db
+    .delete(adminUser)
+    .where(eq(adminUser.username, username))
+    .returning();
+  return row ?? null;
+}
+
+export async function updateAdminCredentials({
+  currentUsername,
+  username,
+  password,
+}: {
+  currentUsername: string;
+  username: string;
+  password: string;
+}) {
+  const { hash, salt } = hashPassword(password);
+  const [row] = await db
     .update(adminUser)
     .set({ username, passwordHash: hash, salt })
-    .where(eq(adminUser.username, current.username));
+    .where(eq(adminUser.username, currentUsername))
+    .returning();
+  return row ?? null;
 }
 
 export async function setAdminSession(username: string) {

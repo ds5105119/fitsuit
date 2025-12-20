@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAdminSession, updateAdminCredentials } from "@/lib/auth/admin";
+import { getAdminSession, setAdminSession, updateAdminCredentials } from "@/lib/auth/admin";
 
 export async function POST(request: Request) {
   const session = await getAdminSession();
@@ -8,7 +8,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { username, password } = await request.json();
+  const body = await request.json().catch(() => null);
+  const username = typeof body?.username === "string" ? body.username.trim() : "";
+  const password = typeof body?.password === "string" ? body.password.trim() : "";
 
   if (!username || !password) {
     return NextResponse.json(
@@ -17,7 +19,15 @@ export async function POST(request: Request) {
     );
   }
 
-  await updateAdminCredentials({ username, password });
+  const updated = await updateAdminCredentials({
+    currentUsername: session.username,
+    username,
+    password,
+  });
+  if (!updated) {
+    return NextResponse.json({ error: "계정을 찾을 수 없습니다." }, { status: 404 });
+  }
+  await setAdminSession(username);
 
   return NextResponse.json({ ok: true });
 }

@@ -7,6 +7,7 @@ export const ORDER_STATUSES = ["접수", "취소", "제작중", "견적 완료",
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 export type NewInquiry = {
+  orderId?: string | null;
   name: string;
   email: string;
   phone?: string | null;
@@ -36,13 +37,15 @@ export type NewConciergeOrder = {
 };
 
 export async function saveInquiry(data: NewInquiry) {
-  await db.insert(inquiry).values({
+  const [row] = await db.insert(inquiry).values({
+    orderId: data.orderId ?? null,
     name: data.name,
     email: data.email,
     phone: data.phone ?? null,
     message: data.message,
     attachmentUrl: data.attachmentUrl ?? null,
-  });
+  }).returning();
+  return row ?? null;
 }
 
 export async function listInquiries() {
@@ -50,6 +53,41 @@ export async function listInquiries() {
     .select()
     .from(inquiry)
     .orderBy(sql`"createdAt" DESC`);
+}
+
+export async function listInquiriesForUser(email: string) {
+  return db
+    .select()
+    .from(inquiry)
+    .where(eq(inquiry.email, email))
+    .orderBy(sql`"createdAt" DESC`);
+}
+
+export async function getInquiryById(id: string) {
+  const [row] = await db
+    .select()
+    .from(inquiry)
+    .where(eq(inquiry.id, id))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function updateInquiryReply({
+  id,
+  replyMessage,
+}: {
+  id: string;
+  replyMessage: string | null;
+}) {
+  const [row] = await db
+    .update(inquiry)
+    .set({
+      replyMessage,
+      replyUpdatedAt: replyMessage ? new Date() : null,
+    })
+    .where(eq(inquiry.id, id))
+    .returning();
+  return row ?? null;
 }
 
 export async function saveConciergeOrder(data: NewConciergeOrder) {

@@ -64,7 +64,7 @@ export function AdminLoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-full bg-amber-400 px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-black shadow-[0_12px_35px_rgba(255,193,7,0.3)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_45px_rgba(255,193,7,0.4)] disabled:cursor-not-allowed disabled:opacity-60"
+        className="w-full rounded-full bg-amber-400 px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-black transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? "로그인 중..." : "로그인"}
       </button>

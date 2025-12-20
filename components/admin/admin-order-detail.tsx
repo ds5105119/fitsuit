@@ -189,6 +189,12 @@ export function AdminOrderDetail({ orderId }: { orderId: string }) {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Link
+            href={`/admin/inquiries?orderId=${order.id}`}
+            className="rounded-full border border-neutral-300 px-4 py-2 text-sm text-neutral-800 hover:bg-neutral-100"
+          >
+            문의 보기
+          </Link>
           <button
             type="button"
             onClick={deleteOrder}
@@ -207,7 +213,7 @@ export function AdminOrderDetail({ orderId }: { orderId: string }) {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
-        <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
           <div className="border-b border-neutral-200 px-4 py-3">
             <p className="text-sm font-semibold text-neutral-900">프리뷰</p>
             <p className="text-xs text-neutral-500">접수 시점 이미지</p>
@@ -274,7 +280,7 @@ export function AdminOrderDetail({ orderId }: { orderId: string }) {
         </div>
 
         <div className="flex flex-col gap-6">
-          <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
             <div className="border-b border-neutral-200 px-4 py-3">
               <p className="text-sm font-semibold text-neutral-900">주문 구성</p>
               <p className="text-xs text-neutral-500">선택 옵션</p>
@@ -300,7 +306,7 @@ export function AdminOrderDetail({ orderId }: { orderId: string }) {
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
             <div className="border-b border-neutral-200 px-4 py-3">
               <p className="text-sm font-semibold text-neutral-900">사이즈</p>
               <p className="text-xs text-neutral-500">입력 치수</p>

@@ -8,7 +8,7 @@ export const metadata = {
 export default async function AdminLoginPage() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-black via-neutral-950 to-black px-6 py-16 text-white">
-      <div className="mx-auto flex max-w-md flex-col gap-6 rounded-2xl border border-white/10 bg-white/5 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+      <div className="mx-auto flex max-w-md flex-col gap-6 rounded-2xl border border-white/10 bg-white/5 p-8">
         <Link href="/" className="text-xs uppercase tracking-[0.22em] text-amber-200 hover:text-amber-100">
           ← Home
         </Link>

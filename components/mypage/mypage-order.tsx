@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { listConciergeOrdersForUser } from "@/lib/db/queries";
+import { getUserProfileByEmail, listConciergeOrdersForUser } from "@/lib/db/queries";
 import { auth } from "@/auth";
 import { OrderCancelButton } from "./order-cancel-button";
 import { cn } from "@/lib/utils";
+import { MyPageInquiryDialog } from "./mypage-inquiry-dialog";
 
 function formatDate(input: Date) {
   return new Intl.DateTimeFormat("ko-KR", {
@@ -19,7 +20,7 @@ function formatPrice(price: number | null) {
   return `${new Intl.NumberFormat("ko-KR").format(price)}원`;
 }
 
-export async function MyPageContent() {
+export async function MyPageOrder() {
   const session = await auth();
   const email = session?.user?.email;
 
@@ -27,7 +28,9 @@ export async function MyPageContent() {
     redirect("/mypage/login?callbackUrl=/mypage");
   }
 
-  const orders = await listConciergeOrdersForUser(email);
+  const [orders, profile] = await Promise.all([listConciergeOrdersForUser(email), getUserProfileByEmail(email)]);
+  const userName = profile?.userName ?? session?.user?.name ?? "고객";
+  const phone = profile?.phone ?? "";
 
   return (
     <section className="flex-1">
@@ -94,15 +97,18 @@ export async function MyPageContent() {
                   status={order.status}
                   className="col-span-1 flex items-center justify-center text-sm font-semibold shadow-[inset_0_0_0_1px_rgb(229_229_229)] py-2 lg:w-36 rounded-md hover:bg-neutral-100"
                 />
-                <Link
-                  href={`/mypage/orders/${order.id}`}
-                  className={cn(
+                <MyPageInquiryDialog
+                  email={email}
+                  userName={userName}
+                  phone={phone}
+                  order={{ id: order.id }}
+                  orderError={false}
+                  triggerLabel="문의하기"
+                  triggerClassName={cn(
                     "col-span-1 hidden items-center justify-center text-sm font-semibold shadow-[inset_0_0_0_1px_var(--color-sky-500)] py-2 lg:w-36 rounded-md hover:bg-sky-100 text-sky-500",
                     order.status !== "취소" && "flex!"
                   )}
-                >
-                  문의하기
-                </Link>
+                />
                 <button
                   className={cn(
                     "col-span-full hidden items-center justify-center text-sm font-semibold bg-sky-500 text-white py-2 lg:w-36 rounded-md hover:bg-sky-400",

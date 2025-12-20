@@ -35,7 +35,7 @@ export function AdminSidebar() {
           className="flex items-center gap-2 rounded-lg border border-neutral-200 px-3 py-2 text-sm font-semibold text-neutral-800 hover:bg-neutral-100"
         >
           <HomeIcon className="h-4 w-4" />
-          사이트로 이동
+          대시보드로 이동
         </Link>
       </SidebarFooter>
     </Sidebar>

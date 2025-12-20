@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { saveInquiry } from "@/lib/db/queries";
 
+const UUID_REGEX = /^[0-9a-fA-F-]{36}$/;
+
 export async function POST(request: Request) {
   const formData = await request.formData();
+  const orderId = String(formData.get("orderId") || "").trim();
   const name = String(formData.get("name") || "").trim();
   const email = String(formData.get("email") || "").trim();
   const phone = String(formData.get("phone") || "").trim();
@@ -30,7 +33,10 @@ export async function POST(request: Request) {
     attachmentUrl = blob.url;
   }
 
+  const normalizedOrderId = orderId && UUID_REGEX.test(orderId) ? orderId : null;
+
   await saveInquiry({
+    orderId: normalizedOrderId,
     name,
     email,
     phone: phone || null,

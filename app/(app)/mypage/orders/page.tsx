@@ -1,4 +1,4 @@
-import { MyPageContent } from "@/components/mypage/mypage-content";
+import { MyPageOrder } from "@/components/mypage/mypage-order";
 import { SuspenseSkeleton } from "@/components/suspense-skeleton";
 import { Suspense } from "react";
 
@@ -8,8 +8,8 @@ export const metadata = {
 
 export default function MyPage() {
   return (
-    <Suspense fallback={<SuspenseSkeleton/>}>
-      <MyPageContent />
+    <Suspense fallback={<SuspenseSkeleton />}>
+      <MyPageOrder />
     </Suspense>
   );
 }

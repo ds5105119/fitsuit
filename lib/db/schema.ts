@@ -5,11 +5,14 @@ import { Measurements, StoredSelections } from "@/components/ai-configurator/typ
 export const inquiry = pgTable("Inquiry", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
+  orderId: uuid("orderId"),
   name: varchar("name", { length: 120 }).notNull(),
   email: varchar("email", { length: 160 }).notNull(),
   phone: varchar("phone", { length: 64 }),
   message: text("message").notNull(),
   attachmentUrl: text("attachmentUrl"),
+  replyMessage: text("replyMessage"),
+  replyUpdatedAt: timestamp("replyUpdatedAt"),
 });
 
 export type Inquiry = InferSelectModel<typeof inquiry>;

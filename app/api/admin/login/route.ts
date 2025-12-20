@@ -5,7 +5,9 @@ import {
 } from "@/lib/auth/admin";
 
 export async function POST(request: Request) {
-  const { username, password } = await request.json();
+  const body = await request.json().catch(() => null);
+  const username = typeof body?.username === "string" ? body.username.trim() : "";
+  const password = typeof body?.password === "string" ? body.password.trim() : "";
 
   if (!username || !password) {
     return NextResponse.json(
