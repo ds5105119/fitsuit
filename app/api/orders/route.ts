@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { randomUUID } from "crypto";
 import { auth } from "@/auth";
-import { listConciergeOrdersForUser, saveConciergeOrder } from "@/lib/db/queries";
+import { getUserProfileByEmail, listConciergeOrdersForUser, saveConciergeOrder } from "@/lib/db/queries";
 
 const MAX_IMAGE_STRING_LENGTH = 8_000_000;
 const MAX_IMAGE_BYTES = 8_000_000;
@@ -158,9 +158,10 @@ export async function POST(req: Request) {
     );
   }
 
+  const profile = await getUserProfileByEmail(email);
   const inserted = await saveConciergeOrder({
     userEmail: email,
-    userName: session?.user?.name ?? null,
+    userName: profile?.userName ?? session?.user?.name ?? null,
     selections,
     measurements,
     previewUrl: storedPreviewUrl,

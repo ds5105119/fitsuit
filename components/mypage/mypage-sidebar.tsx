@@ -11,6 +11,7 @@ import { Measurements, StoredSelections } from "../ai-configurator/types";
 export default function MyPageSidebar({
   orders,
   session,
+  profile,
 }: {
   orders?: {
     id: string;
@@ -25,15 +26,19 @@ export default function MyPageSidebar({
     backgroundPreview: string | null;
   }[];
   session?: Session;
+  profile?: {
+    userName: string | null;
+  };
 }) {
   const pathname = usePathname();
+  const displayName = profile?.userName ?? session?.user?.name ?? "이름 없음";
 
   return (
-    <aside className="w-60 hidden lg:block">
+    <aside className="w-60 hidden lg:block mr-10">
       <div className="px-3 py-3 border-neutral-200 border-[1.2px] rounded-lg bg-blue-50">
         <div className="flex items-center justify-between">
           <p className="font-bold">
-            {session?.user?.name ?? "이름 없음"}
+            {displayName}
             <span className="font-normal">님</span>
           </p>
           <ChevronRightIcon className="size-5 text-neutral-500" />
@@ -50,7 +55,7 @@ export default function MyPageSidebar({
             href="/mypage/orders"
             className={cn(
               "flex items-center justify-between px-3 py-2 hover:bg-neutral-200 rounded-lg",
-              pathname === "/mypage/orders" && "bg-neutral-200/60 font-semibold"
+              pathname.startsWith("/mypage/orders") && "bg-neutral-200/60 font-semibold"
             )}
           >
             <span>주문/배송 조회</span>

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { listConciergeOrdersForUser } from "@/lib/db/queries";
 import { auth } from "@/auth";
 import { OrderCancelButton } from "./order-cancel-button";
+import { cn } from "@/lib/utils";
 
 function formatDate(input: Date) {
   return new Intl.DateTimeFormat("ko-KR", {
@@ -35,7 +36,7 @@ export async function MyPageContent() {
         <p className="text-xs text-neutral-500">모든 제작 상품은 상황에 따라 분리배송 될 수 있어요.</p>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto space-y-6">
         {orders.map((order) => (
           <div key={order.id} className="flex flex-col border border-neutral-200 rounded-xl p-4 space-y-4">
             <div className="w-full flex justify-between items-center">
@@ -99,12 +100,14 @@ export async function MyPageContent() {
                 >
                   문의하기
                 </Link>
-                <Link
-                  href={`/mypage/orders/${order.id}`}
-                  className="col-span-full flex items-center justify-center text-sm font-semibold bg-sky-500 text-white py-2 lg:w-36 rounded-md hover:bg-sky-400"
+                <button
+                  className={cn(
+                    "col-span-full hidden items-center justify-center text-sm font-semibold bg-sky-500 text-white py-2 lg:w-36 rounded-md hover:bg-sky-400",
+                    order.status === "견적 완료" && "flex!"
+                  )}
                 >
                   결제하기
-                </Link>
+                </button>
               </div>
             </div>
 

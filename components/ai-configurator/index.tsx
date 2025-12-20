@@ -231,9 +231,7 @@ export function AIConfigurator() {
         setPreviewUrl(previewToUse);
         restoredPreviewRef.current = previewToUse;
         setPreviewOwner(ownerToUse);
-        setPresets((prev) =>
-          prev.map((p, idx) => (idx === ownerToUse ? { ...p, previewUrl: previewToUse || p.previewUrl } : p))
-        );
+        setPresets((prev) => prev.map((p, idx) => (idx === ownerToUse ? { ...p, previewUrl: previewToUse || p.previewUrl } : p)));
       }
 
       if (parsed?.viewMode === "summary" || parsed?.viewMode === "config") setViewMode(parsed.viewMode);
@@ -290,10 +288,7 @@ export function AIConfigurator() {
         // ignore quota errors
       }
       try {
-        sessionStorage.setItem(
-          STORAGE_PREVIEW_KEY,
-          JSON.stringify({ url: previewUrl, owner: previewOwner })
-        );
+        sessionStorage.setItem(STORAGE_PREVIEW_KEY, JSON.stringify({ url: previewUrl, owner: previewOwner }));
       } catch {
         // ignore
       }

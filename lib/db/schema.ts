@@ -23,6 +23,19 @@ export const adminUser = pgTable("AdminUser", {
 
 export type AdminUser = InferSelectModel<typeof adminUser>;
 
+export const userProfile = pgTable("UserProfile", {
+  userEmail: varchar("userEmail", { length: 160 }).primaryKey().notNull(),
+  userName: varchar("userName", { length: 120 }),
+  phone: varchar("phone", { length: 64 }),
+  address: text("address"),
+  gender: varchar("gender", { length: 32 }),
+  birthDate: varchar("birthDate", { length: 16 }),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export type UserProfile = InferSelectModel<typeof userProfile>;
+
 export const conciergeOrder = pgTable("ConciergeOrder", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
   createdAt: timestamp("createdAt").notNull().defaultNow(),

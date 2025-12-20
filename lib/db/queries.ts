@@ -1,6 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "./client";
-import { conciergeOrder, inquiry } from "./schema";
+import { conciergeOrder, inquiry, userProfile } from "./schema";
 import { StoredSelections, WearCategory } from "@/components/ai-configurator/types";
 
 export const ORDER_STATUSES = ["접수", "취소", "제작중", "견적 완료", "완료"] as const;
@@ -129,6 +129,77 @@ export async function deleteConciergeOrderById(id: string) {
     });
 
   return row ?? null;
+}
+
+export async function getUserProfileByEmail(userEmail: string) {
+  const [row] = await db
+    .select()
+    .from(userProfile)
+    .where(eq(userProfile.userEmail, userEmail))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function upsertUserProfile({
+  userEmail,
+  userName,
+  phone,
+  address,
+  gender,
+  birthDate,
+}: {
+  userEmail: string;
+  userName: string | null;
+  phone: string | null;
+  address: string | null;
+  gender: string | null;
+  birthDate: string | null;
+}) {
+  const now = new Date();
+  const [row] = await db
+    .insert(userProfile)
+    .values({
+      userEmail,
+      userName,
+      phone,
+      address,
+      gender,
+      birthDate,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .onConflictDoUpdate({
+      target: userProfile.userEmail,
+      set: {
+        userName,
+        phone,
+        address,
+        gender,
+        birthDate,
+        updatedAt: now,
+      },
+    })
+    .returning();
+  return row ?? null;
+}
+
+export async function deleteUserProfileByEmail(userEmail: string) {
+  const [row] = await db
+    .delete(userProfile)
+    .where(eq(userProfile.userEmail, userEmail))
+    .returning();
+  return row ?? null;
+}
+
+export async function deleteConciergeOrdersByUserEmail(userEmail: string) {
+  return db
+    .delete(conciergeOrder)
+    .where(eq(conciergeOrder.userEmail, userEmail))
+    .returning({
+      previewUrl: conciergeOrder.previewUrl,
+      originalUpload: conciergeOrder.originalUpload,
+      backgroundPreview: conciergeOrder.backgroundPreview,
+    });
 }
 
 export async function updateConciergeOrderStatus({

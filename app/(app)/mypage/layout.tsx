@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { LoginDialog } from "@/components/login-dialog";
 import MyPageSidebar from "@/components/mypage/mypage-sidebar";
 import { SuspenseSkeleton } from "@/components/suspense-skeleton";
-import { listConciergeOrdersForUser } from "@/lib/db/queries";
+import { getUserProfileByEmail, listConciergeOrdersForUser } from "@/lib/db/queries";
 import { Suspense } from "react";
 
 async function MypageLayoutLoader({
@@ -17,7 +17,7 @@ async function MypageLayoutLoader({
     return (
       <main className="mt-16 lg:mt-20 min-h-[calc(100vh-4rem)] bg-white text-neutral-900">
         <div className="mx-auto h-full max-w-6xl px-6 py-10">
-          <div className="mt-8 flex space-x-10">
+          <div className="mt-8 flex">
             <MyPageSidebar orders={undefined} session={undefined} />
 
             <LoginDialog defaultOpen={true} callbackUrl="/mypage/orders" />
@@ -27,13 +27,18 @@ async function MypageLayoutLoader({
     );
   }
 
-  const orders = await listConciergeOrdersForUser(email);
+  const [orders, profile] = await Promise.all([listConciergeOrdersForUser(email), getUserProfileByEmail(email)]);
+  const profileSummary = profile
+    ? {
+        userName: profile.userName,
+      }
+    : undefined;
 
   return (
     <main className="mt-16 lg:mt-20 min-h-[calc(100vh-4rem)] bg-white text-neutral-900">
       <div className="mx-auto h-full max-w-6xl px-6 py-10">
-        <div className="mt-8 flex space-x-10">
-          <MyPageSidebar orders={orders} session={session} />
+        <div className="mt-8 flex">
+          <MyPageSidebar orders={orders} session={session} profile={profileSummary} />
 
           {children}
         </div>

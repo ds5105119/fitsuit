@@ -25,9 +25,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
 
   const body = await req.json().catch(() => null);
+  const hasStatus = body && Object.prototype.hasOwnProperty.call(body, "status");
   const status = body?.status;
-  const hasStatus = typeof status === typeof ORDER_STATUSES;
-  if (hasStatus && !ORDER_STATUSES.includes(status)) {
+  if (hasStatus && typeof status !== "string") {
+    return NextResponse.json({ error: "잘못된 상태입니다." }, { status: 400 });
+  }
+  if (typeof status === "string" && !ORDER_STATUSES.includes(status)) {
     return NextResponse.json({ error: "잘못된 상태입니다." }, { status: 400 });
   }
 
@@ -51,7 +54,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const { id } = await params;
   const updated = await updateConciergeOrderById({
     id,
-    status: hasStatus ? status : undefined,
+    status: typeof status === "string" ? status : undefined,
     price,
   });
   if (!updated) {

@@ -15,6 +15,20 @@
       "when": 1766232680327,
       "tag": "0001_modern_paladin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766239815505,
+      "tag": "0002_absurd_colleen_wing",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1766240421638,
+      "tag": "0003_tricky_ultimates",
+      "breakpoints": true
     }
   ]
 }
