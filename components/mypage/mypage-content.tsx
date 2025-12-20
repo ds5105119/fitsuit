@@ -47,10 +47,10 @@ export async function MyPageContent() {
               </div>
 
               <div className="flex items-center space-x-2 shrink-0">
-                <span className="text-xs lg:text-sm font-semibold bg-sky-100 text-sky-600 px-5 py-2 rounded-md">{order.status}</span>
+                <span className="text-sm font-semibold bg-sky-100 text-sky-600 px-5 py-2 rounded-md">{order.status}</span>
                 <Link
                   href={`/mypage/orders/${order.id}`}
-                  className="text-xs lg:text-sm font-semibold shadow-[inset_0_0_0_1px_rgb(229_229_229)] px-5 py-2 rounded-md hover:bg-neutral-100"
+                  className="hidden lg:block text-sm font-semibold shadow-[inset_0_0_0_1px_rgb(229_229_229)] px-5 py-2 rounded-md hover:bg-neutral-100"
                 >
                   자세히 보기
                 </Link>
@@ -60,7 +60,7 @@ export async function MyPageContent() {
             <hr className="border-neutral-200" />
 
             <div className="w-full flex flex-col lg:flex-row justify-between items-center">
-              <div className="flex w-full lg:w-fit items-center space-x-4">
+              <Link href={`/mypage/orders/${order.id}`} className="flex w-full lg:w-fit items-center space-x-4">
                 <div className="relative h-28 w-28 rounded-md aspect-square overflow-hidden shrink-0">
                   <Image src={`${order.previewUrl}`} alt="주문 이미지" fill className="object-cover" />
                 </div>
@@ -75,7 +75,7 @@ export async function MyPageContent() {
                     )}
                   </p>
                 </div>
-              </div>
+              </Link>
 
               <div className="lg:hidden rounded-lg bg-blue-50 p-4 my-4">
                 <p className="text-sm text-neutral-500">

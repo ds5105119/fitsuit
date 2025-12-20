@@ -129,7 +129,7 @@ export function SiteHeader() {
               <SheetTrigger>
                 <Menu className="lg:hidden" />
               </SheetTrigger>
-              <SheetContent side="left" className="w-full sm:max-w-md p-0">
+              <SheetContent showClose={false} side="left" className="w-full sm:max-w-md p-0">
                 <SheetHeader className="sr-only">
                   <SheetTitle />
                   <SheetDescription />
