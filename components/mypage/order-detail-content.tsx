@@ -14,6 +14,7 @@ function formatDate(input: Date) {
 
 export async function OrderDetailContent({ id }: { id: string }) {
   const session = await auth();
+
   const email = session?.user?.email;
   if (!email) {
     redirect("/mypage/orders");

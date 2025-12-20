@@ -1,4 +1,5 @@
 import { MyPageContent } from "@/components/mypage/mypage-content";
+import { SuspenseSkeleton } from "@/components/suspense-skeleton";
 import { Suspense } from "react";
 
 export const metadata = {
@@ -7,7 +8,7 @@ export const metadata = {
 
 export default function MyPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<SuspenseSkeleton/>}>
       <MyPageContent />
     </Suspense>
   );
