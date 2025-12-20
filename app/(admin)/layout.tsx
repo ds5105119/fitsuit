@@ -59,7 +59,9 @@ export default function RootLayout({
               <AdminSidebar />
             </Suspense>
             <SidebarInset>
-              <Header />
+              <Suspense fallback={null}>
+                <Header />
+              </Suspense>
               <main className="flex w-full scrollbar-hide break-keep">{children}</main>
             </SidebarInset>
           </SidebarProvider>
