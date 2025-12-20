@@ -56,7 +56,7 @@ export async function OrderDetail({ id }: { id: string }) {
 
   return (
     <section className="flex-1">
-      <div className="w-full flex flex-col space-y-2 lg:flex-row lg:space-y-0 lg:justify-between lg:items-center pb-4">
+      <div className="w-full flex flex-row justify-between items-center pb-4">
         <p className="text-lg font-bold">주문/배송 상세</p>
         <Link href="/mypage/orders" className="text-sm text-neutral-600 hover:underline">
           ← 주문 목록
@@ -64,18 +64,27 @@ export async function OrderDetail({ id }: { id: string }) {
       </div>
 
       <div className="flex items-center justify-between px-4 py-4 bg-neutral-50 rounded-xl">
-        <p className="mt-1 text-neutral-600">
+        <p className="hidden lg:block text-neutral-600">
           주문번호 <span className="font-semibold text-black">{order.id.slice(0, 8).toUpperCase()}</span> · 주문일자
           <span className="font-semibold text-black"> {formatDate(new Date(order.createdAt))}</span>
         </p>
+
+        <div className="lg:hidden flex flex-col space-y-1">
+          <p className="text-sm">
+            주문번호 <span className="font-semibold text-black">{order.id.slice(0, 8).toUpperCase()}</span>
+          </p>
+          <p className="text-sm">
+            주문일자 <span className="font-semibold text-black"> {formatDate(new Date(order.createdAt))}</span>
+          </p>
+        </div>
+
         <span className="text-sm font-semibold bg-sky-100 text-sky-600 px-5 lg:px-8 py-2 rounded-md">{order.status}</span>
       </div>
 
-      <div className="mt-8 flex flex-col gap-8 lg:flex-row">
+      <div className="mt-6 lg:mt-8 flex flex-col gap-8 lg:flex-row">
         <div className="bg-neutral-50 rounded-xl p-4 flex flex-col space-y-4 w-full lg:min-w-90 lg:w-90 h-fit">
           <div>
             <p className="text-base font-bold">주문 이미지</p>
-            <p className="text-sm text-neutral-500">접수 시점의 AI 프리뷰입니다.</p>
           </div>
           <div className="relative aspect-4/3 w-full overflow-hidden bg-neutral-100">
             {hero ? (
