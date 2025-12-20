@@ -29,7 +29,7 @@ export async function MyPageContent() {
   const orders = await listConciergeOrdersForUser(email);
 
   return (
-    <section className="grow">
+    <section className="flex-1">
       <div className="flex items-center justify-between pb-4">
         <p className="text-lg font-bold">주문/배송 조회</p>
         <p className="text-xs text-neutral-500">모든 제작 상품은 상황에 따라 분리배송 될 수 있어요.</p>
