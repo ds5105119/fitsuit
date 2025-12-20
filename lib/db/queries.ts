@@ -1,6 +1,7 @@
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "./client";
 import { conciergeOrder, inquiry } from "./schema";
+import { StoredSelections, WearCategory } from "@/components/ai-configurator/types";
 
 export const ORDER_STATUSES = ["접수", "취소", "제작중", "완료"] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
@@ -51,13 +52,20 @@ export async function listInquiries() {
 }
 
 export async function saveConciergeOrder(data: NewConciergeOrder) {
+  const selections: StoredSelections = data.selections.map((s) => ({
+    category: s.category as WearCategory,
+    group: s.group ?? null,
+    title: s.title,
+    subtitle: s.subtitle ?? "",
+  }));
+
   const [row] = await db
     .insert(conciergeOrder)
     .values({
       userEmail: data.userEmail,
       userName: data.userName ?? null,
       status: data.status ?? "접수",
-      selections: data.selections,
+      selections,
       measurements: data.measurements ?? null,
       previewUrl: data.previewUrl ?? null,
       originalUpload: data.originalUpload ?? null,

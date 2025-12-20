@@ -16,3 +16,15 @@ export type Preset = {
   selections: SelectionState;
   previewUrl: string;
 };
+
+export type StoredSelectionItem = {
+  category: WearCategory;
+  group: string | null;
+  title: string;
+  subtitle: string;
+};
+
+export type StoredSelections = StoredSelectionItem[];
+
+export type MeasurementKey = "height" | "weight" | "neck" | "chest" | "belly" | "waist" | "hip" | "thigh";
+export type Measurements = Partial<Record<MeasurementKey, string>> | null;

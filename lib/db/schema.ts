@@ -1,5 +1,6 @@
 import { jsonb, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import type { InferSelectModel } from "drizzle-orm";
+import { Measurements, StoredSelections } from "@/components/ai-configurator/types";
 
 export const inquiry = pgTable("Inquiry", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
@@ -28,14 +29,11 @@ export const conciergeOrder = pgTable("ConciergeOrder", {
   userEmail: varchar("userEmail", { length: 160 }).notNull(),
   userName: varchar("userName", { length: 120 }),
   status: varchar("status", { length: 32 }).notNull().default("접수"),
-  selections: jsonb("selections").notNull(),
-  measurements: jsonb("measurements"),
+  selections: jsonb("selections").$type<StoredSelections>().notNull(),
+  measurements: jsonb("measurements").$type<Measurements>(),
   previewUrl: text("previewUrl"),
   originalUpload: text("originalUpload"),
   backgroundPreview: text("backgroundPreview"),
 });
 
 export type ConciergeOrder = InferSelectModel<typeof conciergeOrder>;
-
-// Auth.js (NextAuth v5) tables (Drizzle-backed custom adapter)
-// Auth.js Passkey/WebAuthn tables removed. Add back via migrations if needed.

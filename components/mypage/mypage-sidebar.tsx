@@ -1,12 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { Session } from "next-auth";
+import { ChevronRightIcon } from "lucide-react";
+import { Measurements, StoredSelections } from "../ai-configurator/types";
 
 export default function MyPageSidebar({
   orders,
+  session,
 }: {
   orders: {
     id: string;
@@ -14,18 +18,29 @@ export default function MyPageSidebar({
     userEmail: string;
     userName: string | null;
     status: string;
-    selections: unknown;
-    measurements: unknown;
+    selections: StoredSelections;
+    measurements: Measurements;
     previewUrl: string | null;
     originalUpload: string | null;
     backgroundPreview: string | null;
   }[];
+  session?: Session;
 }) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-60">
-      <div className="border-b border-neutral-200 px-4 pb-4">
+    <aside className="w-60 hidden lg:block">
+      <div className="px-3 py-3 border-neutral-200 border-[1.2px] rounded-lg bg-blue-50">
+        <div className="flex items-center justify-between">
+          <p className="font-bold">
+            {session?.user?.name ?? "이름 없음"}
+            <span className="font-normal">님</span>
+          </p>
+          <ChevronRightIcon className="size-5 text-neutral-500" />
+        </div>
+      </div>
+
+      <div className="border-b border-neutral-200 px-4 py-4">
         <p className="text-sm font-semibold">마이페이지 메뉴</p>
       </div>
       <nav className="px-2 py-3 text-sm flex flex-col space-y-4">

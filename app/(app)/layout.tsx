@@ -4,8 +4,8 @@ import { Suspense } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthSessionProvider } from "@/components/auth/auth-session-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { SessionProvider } from "next-auth/react";
 
 import "../globals.css";
 
@@ -46,14 +46,14 @@ export default function RootLayout({
     <html className={`${geist.variable} ${geistMono.variable} ${playfair.variable}`} lang="en" suppressHydrationWarning>
       <TooltipProvider>
         <body className="antialiased bg-white">
-          <AuthSessionProvider>
+          <SessionProvider>
             <Suspense fallback={null}>
               <SiteHeader />
             </Suspense>
             {children}
             <SiteFooter />
             <Toaster position="bottom-right" />
-          </AuthSessionProvider>
+          </SessionProvider>
         </body>
       </TooltipProvider>
     </html>

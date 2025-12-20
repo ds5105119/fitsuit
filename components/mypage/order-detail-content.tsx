@@ -1,9 +1,8 @@
 import Link from "next/link";
 import NextImage from "next/image";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { getConciergeOrderById } from "@/lib/db/queries";
 import { auth } from "@/auth";
-import { Suspense } from "react";
 import { OrderCancelButton } from "@/components/mypage/order-cancel-button";
 
 function formatDate(input: Date) {
@@ -13,20 +12,7 @@ function formatDate(input: Date) {
   }).format(input);
 }
 
-type Props = {
-  id: string;
-  fallback?: React.ReactNode;
-};
-
-export function OrderDetailContent({ id, fallback }: Props) {
-  return (
-    <Suspense fallback={fallback ?? null}>
-      <OrderDetailContentInner id={id} />
-    </Suspense>
-  );
-}
-
-async function OrderDetailContentInner({ id }: { id: string }) {
+export async function OrderDetailContent({ id }: { id: string }) {
   const session = await auth();
   const email = session?.user?.email;
   if (!email) {
