@@ -38,18 +38,13 @@ export function AdminLoginForm() {
   return (
     <form className="space-y-4" onSubmit={submit}>
       <div className="space-y-2">
-        <label className="text-sm text-white/80" htmlFor="username">
+        <label className="text-sm text-black/80" htmlFor="username">
           아이디
         </label>
-        <input
-          id="username"
-          name="username"
-          required
-          className="w-full rounded-xl border border-white/15 bg-black/40 px-3 py-2 text-white outline-none ring-amber-300/40 focus:border-amber-200 focus:ring-2"
-        />
+        <input id="username" name="username" required className="w-full rounded-xl border border-black/15 bg-neutral-100 px-3 py-2 outline-none" />
       </div>
       <div className="space-y-2">
-        <label className="text-sm text-white/80" htmlFor="password">
+        <label className="text-sm text-black/80" htmlFor="password">
           비밀번호
         </label>
         <input
@@ -57,7 +52,7 @@ export function AdminLoginForm() {
           name="password"
           type="password"
           required
-          className="w-full rounded-xl border border-white/15 bg-black/40 px-3 py-2 text-white outline-none ring-amber-300/40 focus:border-amber-200 focus:ring-2"
+          className="w-full rounded-xl border border-black/15 bg-neutral-100 px-3 py-2 outline-none"
         />
       </div>
       {error && <p className="text-sm text-red-200">{error}</p>}
