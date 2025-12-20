@@ -16,8 +16,8 @@ async function MypageLayoutLoader({
   if (!email) {
     return (
       <main className="mt-16 lg:mt-20 min-h-[calc(100vh-4rem)] bg-white text-neutral-900">
-        <div className="mx-auto h-full max-w-6xl px-6 py-10">
-          <div className="mt-8 flex">
+        <div className="mx-auto h-full max-w-6xl px-6 py-6 lg:py-10">
+          <div className="lg:mt-8 flex">
             <MyPageSidebar orders={undefined} session={undefined} />
 
             <LoginDialog defaultOpen={true} callbackUrl="/mypage/orders" />
@@ -36,8 +36,8 @@ async function MypageLayoutLoader({
 
   return (
     <main className="mt-16 lg:mt-20 min-h-[calc(100vh-4rem)] bg-white text-neutral-900">
-      <div className="mx-auto h-full max-w-6xl px-6 py-10">
-        <div className="mt-8 flex">
+      <div className="mx-auto h-full max-w-6xl px-6 py-6 lg:py-10">
+        <div className="lg:mt-8 flex">
           <MyPageSidebar orders={orders} session={session} profile={profileSummary} />
 
           {children}
