@@ -47,10 +47,10 @@ export async function MyPageContent() {
               </div>
 
               <div className="flex items-center space-x-2 shrink-0">
-                <span className="text-sm font-semibold bg-sky-100 text-sky-600 px-5 py-2 rounded-md">{order.status}</span>
+                <span className="text-xs lg:text-sm font-semibold bg-sky-100 text-sky-600 px-5 py-2 rounded-md">{order.status}</span>
                 <Link
                   href={`/mypage/orders/${order.id}`}
-                  className="text-sm font-semibold shadow-[inset_0_0_0_1px_rgb(229_229_229)] px-5 py-2 rounded-md hover:bg-neutral-100"
+                  className="text-xs lg:text-sm font-semibold shadow-[inset_0_0_0_1px_rgb(229_229_229)] px-5 py-2 rounded-md hover:bg-neutral-100"
                 >
                   자세히 보기
                 </Link>
