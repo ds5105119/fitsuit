@@ -25,7 +25,15 @@ type ConciergeOrder = {
 type State =
   | { status: "loading" }
   | { status: "error"; message: string }
-  | { status: "ready"; orders: ConciergeOrder[]; inquiries: Inquiry[] };
+  | {
+      status: "ready";
+      orders: ConciergeOrder[];
+      inquiries: Inquiry[];
+      orderTotal: number;
+      orderInProgress: number;
+      inquiryTotal: number;
+      inquiryPending: number;
+    };
 
 export function AdminOverview() {
   const router = useRouter();
@@ -34,8 +42,8 @@ export function AdminOverview() {
   useEffect(() => {
     const load = async () => {
       const [ordersRes, inquiriesRes] = await Promise.all([
-        fetch("/api/admin/orders", { cache: "no-store" }),
-        fetch("/api/admin/inquiries", { cache: "no-store" }),
+        fetch("/api/admin/orders?page=1&pageSize=5", { cache: "no-store" }),
+        fetch("/api/admin/inquiries?page=1&pageSize=5", { cache: "no-store" }),
       ]);
       if (ordersRes.status === 401 || inquiriesRes.status === 401) {
         router.replace("/admin/login");
@@ -51,6 +59,10 @@ export function AdminOverview() {
         status: "ready",
         orders: ordersData?.orders ?? [],
         inquiries: inquiriesData?.inquiries ?? [],
+        orderTotal: Number(ordersData?.total ?? 0),
+        orderInProgress: Number(ordersData?.inProgressCount ?? 0),
+        inquiryTotal: Number(inquiriesData?.total ?? 0),
+        inquiryPending: Number(inquiriesData?.pendingCount ?? 0),
       });
     };
     load();
@@ -73,11 +85,9 @@ export function AdminOverview() {
     return <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{state.message}</div>;
   }
 
-  const { orders, inquiries } = state;
-  const pendingInquiries = inquiries.filter((inq) => !inq.replyMessage);
-  const inProgressOrders = orders.filter((order) => !["완료", "취소"].includes(order.status));
-  const recentOrders = orders.slice(0, 5);
-  const recentInquiries = inquiries.slice(0, 5);
+  const { orders, inquiries, orderTotal, orderInProgress, inquiryTotal, inquiryPending } = state;
+  const recentOrders = orders;
+  const recentInquiries = inquiries;
 
   const today = new Date();
   const todayLabel = new Date(today.getTime() - today.getTimezoneOffset() * 60000)
@@ -89,8 +99,8 @@ export function AdminOverview() {
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-2xl border border-neutral-200 bg-white p-4">
           <p className="text-xs font-semibold tracking-[0.16em] text-neutral-500">ORDERS</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900">{orders.length}</p>
-          <p className="text-sm text-neutral-500">진행중 {inProgressOrders.length}</p>
+          <p className="mt-2 text-2xl font-semibold text-neutral-900">{orderTotal}</p>
+          <p className="text-sm text-neutral-500">진행중 {orderInProgress}</p>
           <div className="mt-3 flex flex-wrap gap-2 text-xs">
             <Link href="/admin/orders" className="rounded-full border border-neutral-300 px-3 py-1 text-neutral-600 hover:bg-neutral-50">
               전체 보기
@@ -106,8 +116,8 @@ export function AdminOverview() {
 
         <div className="rounded-2xl border border-neutral-200 bg-white p-4">
           <p className="text-xs font-semibold tracking-[0.16em] text-neutral-500">INQUIRIES</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900">{inquiries.length}</p>
-          <p className="text-sm text-neutral-500">답변 대기 {pendingInquiries.length}</p>
+          <p className="mt-2 text-2xl font-semibold text-neutral-900">{inquiryTotal}</p>
+          <p className="text-sm text-neutral-500">답변 대기 {inquiryPending}</p>
           <div className="mt-3 flex flex-wrap gap-2 text-xs">
             <Link href="/admin/inquiries" className="rounded-full border border-neutral-300 px-3 py-1 text-neutral-600 hover:bg-neutral-50">
               전체 보기

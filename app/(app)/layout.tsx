@@ -52,7 +52,7 @@ export default function RootLayout({
             </Suspense>
             {children}
             <SiteFooter />
-            <Toaster position="bottom-right" />
+            <Toaster position="bottom-right" theme="light" />
           </SessionProvider>
         </body>
       </TooltipProvider>

@@ -14,31 +14,95 @@ type ProfileFormValues = {
   birthDate: string;
 };
 
+type AddressFields = {
+  postalCode: string;
+  roadAddress: string;
+  detailAddress: string;
+};
+
+const stripNonDigits = (value: string) => value.replace(/\D/g, "");
+
+const formatPhoneNumber = (value: string) => {
+  const digits = stripNonDigits(value);
+  if (!digits) return "";
+
+  if (digits.startsWith("02")) {
+    const limited = digits.slice(0, 10);
+    if (limited.length <= 2) return limited;
+    if (limited.length <= 5) return `${limited.slice(0, 2)}-${limited.slice(2)}`;
+    if (limited.length <= 9) return `${limited.slice(0, 2)}-${limited.slice(2, 5)}-${limited.slice(5)}`;
+    return `${limited.slice(0, 2)}-${limited.slice(2, 6)}-${limited.slice(6)}`;
+  }
+
+  const limited = digits.slice(0, 11);
+  if (limited.length <= 3) return limited;
+  if (limited.length <= 7) return `${limited.slice(0, 3)}-${limited.slice(3)}`;
+  if (limited.length <= 10) return `${limited.slice(0, 3)}-${limited.slice(3, 6)}-${limited.slice(6)}`;
+  return `${limited.slice(0, 3)}-${limited.slice(3, 7)}-${limited.slice(7)}`;
+};
+
+const formatBirthDate = (value: string) => {
+  const digits = stripNonDigits(value).slice(0, 8);
+  if (digits.length <= 4) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 4)}.${digits.slice(4)}`;
+  return `${digits.slice(0, 4)}.${digits.slice(4, 6)}.${digits.slice(6)}`;
+};
+
+const normalizeBirthDatePayload = (value: string) => {
+  const digits = stripNonDigits(value);
+  if (!digits) return "";
+  if (digits.length !== 8) return value.trim();
+  return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
+};
+
+const parseAddress = (raw: string): AddressFields => {
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    return { postalCode: "", roadAddress: "", detailAddress: "" };
+  }
+
+  const [line1, ...rest] = trimmed.split("\n");
+  const detailAddress = rest.join(" ").trim();
+  const line1Trimmed = line1.trim();
+  const match = line1Trimmed.match(/^\(?(\d{5})\)?\s*(.*)$/);
+
+  if (!match) {
+    return { postalCode: "", roadAddress: line1Trimmed, detailAddress };
+  }
+
+  return {
+    postalCode: match[1],
+    roadAddress: match[2].trim(),
+    detailAddress,
+  };
+};
+
+const formatAddress = ({ postalCode, roadAddress, detailAddress }: AddressFields) => {
+  const line1 = [postalCode ? `(${postalCode})` : "", roadAddress].filter(Boolean).join(" ").trim();
+  const line2 = detailAddress.trim();
+  return [line1, line2].filter(Boolean).join("\n").trim();
+};
+
 export function MyPageModifyForm({ email, initialProfile }: { email: string; initialProfile: ProfileFormValues }) {
   const router = useRouter();
   const daumOpen = useDaumPostcodePopup();
-  const [formValues, setFormValues] = useState<ProfileFormValues>(initialProfile);
+  const normalizedProfile = {
+    ...initialProfile,
+    phone: formatPhoneNumber(initialProfile.phone),
+    birthDate: formatBirthDate(initialProfile.birthDate),
+  };
+  const initialAddress = parseAddress(initialProfile.address);
+  const [formValues, setFormValues] = useState<ProfileFormValues>(normalizedProfile);
+  const [postalCode, setPostalCode] = useState(initialAddress.postalCode);
+  const [roadAddress, setRoadAddress] = useState(initialAddress.roadAddress);
+  const [detailAddress, setDetailAddress] = useState(initialAddress.detailAddress);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [fullAddress, setFullAddress] = useState(initialProfile.address);
-  const [address1, setAddress1] = useState("");
-  const [address2, setAddress2] = useState("");
 
   const handleComplete = (data: Address) => {
-    let fullAddress = data.address;
-    let extraAddress = "";
-
-    if (data.addressType === "R") {
-      if (data.bname !== "") {
-        extraAddress += data.bname;
-      }
-      if (data.buildingName !== "") {
-        extraAddress += extraAddress !== "" ? `, ${data.buildingName}` : data.buildingName;
-      }
-      fullAddress += extraAddress !== "" ? ` (${extraAddress})` : "";
-    }
-
-    console.log(fullAddress); // e.g. '서울 성동구 왕십리로2길 20 (성수동1가)'
+    setPostalCode(data.zonecode || "");
+    setRoadAddress(data.roadAddress || "");
+    setDetailAddress("");
   };
 
   const handleClick = () => {
@@ -50,16 +114,27 @@ export function MyPageModifyForm({ email, initialProfile }: { email: string; ini
     setFormValues((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handlePhoneChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setFormValues((prev) => ({ ...prev, phone: formatPhoneNumber(event.target.value) }));
+  };
+
+  const handleBirthDateChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setFormValues((prev) => ({ ...prev, birthDate: formatBirthDate(event.target.value) }));
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (saving) return;
 
     setSaving(true);
     try {
+      const address = formatAddress({ postalCode, roadAddress, detailAddress });
+      const phone = stripNonDigits(formValues.phone);
+      const birthDate = normalizeBirthDatePayload(formValues.birthDate);
       const res = await fetch("/api/mypage/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formValues),
+        body: JSON.stringify({ ...formValues, phone, birthDate, address }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
@@ -101,48 +176,97 @@ export function MyPageModifyForm({ email, initialProfile }: { email: string; ini
     <div className="space-y-6">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="rounded-xl border border-neutral-200 p-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="flex flex-col gap-2 text-sm">
-              <span className="font-semibold text-neutral-600">이름</span>
+          <div className="flex flex-col gap-4">
+            <label className="flex flex-col lg:flex-row lg:items-center gap-2 text-sm">
+              <span className="font-semibold text-neutral-600 w-24 shrink-0">이름</span>
               <input
                 value={formValues.userName}
                 onChange={handleChange("userName")}
                 placeholder="홍길동"
-                className="h-10 w-full rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-900 outline-none ring-neutral-200 focus:border-neutral-400 focus:ring-2"
+                className="h-10 w-full lg:w-72 rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-900 outline-none focus:border-neutral-400"
               />
             </label>
-            <label className="flex flex-col gap-2 text-sm">
-              <span className="font-semibold text-neutral-600">아이디(이메일)</span>
+
+            <hr className="border-neutral-200" />
+
+            <label className="flex flex-col lg:flex-row lg:items-center gap-2 text-sm">
+              <span className="font-semibold text-neutral-600 w-24 shrink-0">이메일</span>
               <input
                 value={email}
                 readOnly
-                className="h-10 w-full cursor-not-allowed rounded-md border border-neutral-200 bg-neutral-100 px-3 text-sm text-neutral-500"
+                className="h-10 w-full lg:w-fit cursor-not-allowed rounded-md border border-neutral-200 bg-neutral-100 px-3 text-sm text-neutral-500 focus:ring-0 focus:outline-0"
               />
             </label>
-            <label className="flex flex-col gap-2 text-sm">
-              <span className="font-semibold text-neutral-600">휴대폰 번호</span>
+
+            <hr className="border-neutral-200" />
+
+            <label className="flex flex-col lg:flex-row lg:items-center gap-2 text-sm">
+              <span className="font-semibold text-neutral-600 w-24 shrink-0">휴대폰 번호</span>
               <input
                 value={formValues.phone}
-                onChange={handleChange("phone")}
+                onChange={handlePhoneChange}
                 placeholder="010-0000-0000"
-                className="h-10 w-full rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-900 outline-none ring-neutral-200 focus:border-neutral-400 focus:ring-2"
+                inputMode="numeric"
+                className="h-10 w-full lg:w-72 rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-900 outline-none focus:border-neutral-400"
               />
             </label>
-            <label className="flex flex-col gap-2 text-sm">
-              <span className="font-semibold text-neutral-600">생년월일</span>
+
+            <hr className="border-neutral-200" />
+
+            <label className="flex flex-col lg:flex-row lg:items-center gap-2 text-sm">
+              <span className="font-semibold text-neutral-600 w-24 shrink-0">주소</span>
+              <div className="flex flex-col space-y-2 w-full">
+                <div className="w-full flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={handleClick}
+                    className="h-10 w-28 shrink-0 rounded-md border border-neutral-300 bg-white text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
+                  >
+                    우편번호 찾기
+                  </button>
+                  <input
+                    value={postalCode}
+                    readOnly
+                    placeholder="우편번호"
+                    className="h-10 w-full lg:w-64 cursor-not-allowed rounded-md border border-neutral-200 bg-neutral-100 px-3 text-sm text-neutral-500 focus:ring-0 focus:outline-0"
+                  />
+                </div>
+                <input
+                  value={roadAddress}
+                  readOnly
+                  placeholder="도로명 주소"
+                  className="h-10 w-full cursor-not-allowed rounded-md border border-neutral-200 bg-neutral-100 px-3 text-sm text-neutral-500 focus:ring-0 focus:outline-0"
+                />
+                <input
+                  value={detailAddress}
+                  onChange={(event) => setDetailAddress(event.target.value)}
+                  placeholder="상세주소 입력"
+                  className="h-10 w-full rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-900 outline-none focus:border-neutral-400"
+                />
+              </div>
+            </label>
+
+            <hr className="border-neutral-200" />
+
+            <label className="flex flex-col lg:flex-row lg:items-center gap-2 text-sm">
+              <span className="font-semibold text-neutral-600 w-24 shrink-0">생년월일</span>
               <input
-                type="date"
                 value={formValues.birthDate}
-                onChange={handleChange("birthDate")}
-                className="h-10 w-full rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-900 outline-none ring-neutral-200 focus:border-neutral-400 focus:ring-2"
+                onChange={handleBirthDateChange}
+                placeholder="2001.02.06"
+                inputMode="numeric"
+                className="h-10 w-full lg:w-fit rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-900 outline-none focus:border-neutral-400"
               />
             </label>
-            <label className="flex flex-col gap-2 text-sm">
-              <span className="font-semibold text-neutral-600">성별</span>
+
+            <hr className="border-neutral-200" />
+
+            <label className="flex flex-col lg:flex-row lg:items-center gap-2 text-sm">
+              <span className="font-semibold text-neutral-600 w-24 shrink-0">성별</span>
               <select
                 value={formValues.gender}
                 onChange={handleChange("gender")}
-                className="h-10 w-full rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-900 outline-none ring-neutral-200 focus:border-neutral-400 focus:ring-2"
+                className="h-10 w-full lg:w-fit rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-900 outline-none focus:border-neutral-400"
               >
                 <option value="">선택 안 함</option>
                 <option value="남성">남성</option>
@@ -150,47 +274,32 @@ export function MyPageModifyForm({ email, initialProfile }: { email: string; ini
                 <option value="기타">기타</option>
               </select>
             </label>
-            <label className="flex flex-col gap-2 text-sm md:col-span-2">
-              <span className="font-semibold text-neutral-600">주소</span>
-              <textarea
-                rows={2}
-                value={formValues.address}
-                onChange={handleChange("address")}
-                placeholder="서울특별시 강남구 ..."
-                className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none ring-neutral-200 focus:border-neutral-400 focus:ring-2"
-              />
-            </label>
           </div>
         </div>
 
-        <div className="flex items-center justify-between rounded-xl border border-neutral-200 bg-blue-50 px-4 py-3">
-          <p className="text-xs text-neutral-500">입력하신 정보는 마이페이지 및 주문 관리에 반영됩니다.</p>
+        <div className="flex items-center justify-between">
+          <div />
+
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={deleting}
+            className="text-sm text-neutral-500 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {deleting ? "처리 중..." : "회원 탈퇴"}
+          </button>
+        </div>
+
+        <div className="flex items-center justify-center">
           <button
             type="submit"
             disabled={saving}
-            className="rounded-md bg-sky-500 px-6 py-2 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-md bg-sky-500 w-full lg:w-fit px-12 py-2 lg:py-3 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saving ? "저장 중..." : "저장"}
           </button>
         </div>
       </form>
-
-      <div className="rounded-xl border border-red-200 bg-red-50 p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-red-700">회원 탈퇴</p>
-            <p className="text-xs text-red-600">탈퇴 시 주문 내역이 모두 삭제되며 복구할 수 없습니다.</p>
-          </div>
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={deleting}
-            className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {deleting ? "처리 중..." : "회원 탈퇴"}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

@@ -15,9 +15,11 @@ async function AdminInquiriesLoader({
     start?: string | string[];
     end?: string | string[];
     orderId?: string | string[];
+    page?: string | string[];
   }>;
 }) {
   const resolved = await searchParams;
+  const page = typeof resolved?.page === "string" ? Number.parseInt(resolved.page, 10) : undefined;
   const rawReply =
     typeof resolved?.reply === "string"
       ? resolved.reply
@@ -34,6 +36,7 @@ async function AdminInquiriesLoader({
     start: typeof resolved?.start === "string" ? resolved.start : undefined,
     end: typeof resolved?.end === "string" ? resolved.end : undefined,
     orderId: typeof resolved?.orderId === "string" ? resolved.orderId : undefined,
+    page: Number.isFinite(page) && page && page > 0 ? page : undefined,
   };
   return <AdminDashboard initialFilters={initialFilters} />;
 }
@@ -48,6 +51,7 @@ export default function AdminInquiriesPage({
     start?: string | string[];
     end?: string | string[];
     orderId?: string | string[];
+    page?: string | string[];
   }>;
 }) {
   return (

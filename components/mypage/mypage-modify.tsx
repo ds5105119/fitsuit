@@ -24,7 +24,7 @@ export async function MyPageModify() {
     <section className="flex-1">
       <div className="w-full flex flex-col space-y-1 lg:flex-row lg:space-y-0 lg:justify-between lg:items-center pb-4">
         <p className="text-lg font-bold">내 정보 수정</p>
-        <p className="text-xs text-neutral-500">마이페이지에서 사용할 회원 정보를 관리하세요.</p>
+        <p className="text-xs text-neutral-500">배송 혹은 긴급 연락 시 사용되는 정보입니다.</p>
       </div>
       <MyPageModifyForm email={email} initialProfile={initialProfile} />
     </section>

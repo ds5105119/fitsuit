@@ -16,7 +16,20 @@ type Inquiry = {
   replyUpdatedAt: string | null;
 };
 
-type State = { status: "loading" } | { status: "error"; message: string } | { status: "ready"; inquiries: Inquiry[] };
+type State =
+  | { status: "loading" }
+  | { status: "error"; message: string }
+  | {
+      status: "ready";
+      inquiries: Inquiry[];
+      total: number;
+      filteredTotal: number;
+      pendingCount: number;
+      page: number;
+      pageSize: number;
+    };
+
+const PAGE_SIZE = 20;
 
 export function AdminDashboard({
   initialFilters,
@@ -27,6 +40,7 @@ export function AdminDashboard({
     end?: string;
     reply?: "all" | "pending" | "answered";
     orderId?: string;
+    page?: number;
   };
 }) {
   const router = useRouter();
@@ -35,10 +49,22 @@ export function AdminDashboard({
   const [startDate, setStartDate] = useState(initialFilters?.start ?? "");
   const [endDate, setEndDate] = useState(initialFilters?.end ?? "");
   const [replyFilter, setReplyFilter] = useState<"all" | "pending" | "answered">(initialFilters?.reply ?? "all");
+  const [orderIdFilter, setOrderIdFilter] = useState(initialFilters?.orderId ?? "");
+  const [page, setPage] = useState(initialFilters?.page ?? 1);
 
   useEffect(() => {
     const load = async () => {
-      const res = await fetch("/api/admin/inquiries", { cache: "no-store" });
+      const params = new URLSearchParams();
+      params.set("page", String(page));
+      params.set("pageSize", String(PAGE_SIZE));
+      const trimmed = query.trim();
+      if (trimmed) params.set("q", trimmed);
+      if (startDate) params.set("start", startDate);
+      if (endDate) params.set("end", endDate);
+      if (replyFilter !== "all") params.set("reply", replyFilter);
+      if (orderIdFilter) params.set("orderId", orderIdFilter);
+
+      const res = await fetch(`/api/admin/inquiries?${params.toString()}`, { cache: "no-store" });
       if (res.status === 401) {
         router.replace("/admin/login");
         return;
@@ -47,11 +73,23 @@ export function AdminDashboard({
         setState({ status: "error", message: "불러오기에 실패했습니다." });
         return;
       }
-      const data = await res.json();
-      setState({ status: "ready", inquiries: data.inquiries ?? [] });
+      const data = await res.json().catch(() => null);
+      const nextPage = Number(data?.page ?? page);
+      if (Number.isFinite(nextPage) && nextPage !== page) {
+        setPage(nextPage);
+      }
+      setState({
+        status: "ready",
+        inquiries: data?.inquiries ?? [],
+        total: Number(data?.total ?? 0),
+        filteredTotal: Number(data?.filteredTotal ?? 0),
+        pendingCount: Number(data?.pendingCount ?? 0),
+        page: Number.isFinite(nextPage) ? nextPage : page,
+        pageSize: Number(data?.pageSize ?? PAGE_SIZE),
+      });
     };
     load();
-  }, [router]);
+  }, [router, endDate, orderIdFilter, page, query, replyFilter, startDate]);
 
   const formatter = useMemo(
     () =>
@@ -63,31 +101,12 @@ export function AdminDashboard({
   );
 
   const inquiries = state.status === "ready" ? state.inquiries : [];
-  const pendingCount = inquiries.filter((inq) => !inq.replyMessage).length;
-
-  const filtered = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    const start = startDate ? new Date(`${startDate}T00:00:00`) : null;
-    const end = endDate ? new Date(`${endDate}T23:59:59.999`) : null;
-    return inquiries.filter((inq) => {
-      const created = new Date(inq.createdAt);
-      if (start && created < start) return false;
-      if (end && created > end) return false;
-      if (replyFilter === "pending" && inq.replyMessage) return false;
-      if (replyFilter === "answered" && !inq.replyMessage) return false;
-      if (!normalizedQuery) return true;
-      const haystack = [
-        inq.name,
-        inq.email,
-        inq.phone ?? "",
-        inq.message,
-        inq.orderId ?? "",
-      ]
-        .join(" ")
-        .toLowerCase();
-      return haystack.includes(normalizedQuery);
-    });
-  }, [endDate, inquiries, query, replyFilter, startDate]);
+  const total = state.status === "ready" ? state.total : 0;
+  const filteredTotal = state.status === "ready" ? state.filteredTotal : 0;
+  const pendingCount = state.status === "ready" ? state.pendingCount : 0;
+  const pageSize = state.status === "ready" ? state.pageSize : PAGE_SIZE;
+  const currentPage = state.status === "ready" ? state.page : page;
+  const totalPages = Math.max(1, Math.ceil(filteredTotal / pageSize));
 
   const highlightCutoff = Date.now() - 24 * 60 * 60 * 1000;
 
@@ -105,39 +124,66 @@ export function AdminDashboard({
         <div>
           <p className="text-xs font-semibold tracking-[0.16em] text-neutral-500">INQUIRIES</p>
           <p className="text-sm text-neutral-500">
-            전체 {inquiries.length} · 답변 대기 {pendingCount} · 필터 {filtered.length}
+            전체 {total} · 답변 대기 {pendingCount} · 필터 {filteredTotal}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <input
             type="date"
             value={startDate}
-            onChange={(event) => setStartDate(event.target.value)}
+            onChange={(event) => {
+              setStartDate(event.target.value);
+              setPage(1);
+            }}
             className="h-9 rounded-md border border-neutral-300 bg-white px-2 text-xs text-neutral-700"
           />
           <span className="text-xs text-neutral-400">~</span>
           <input
             type="date"
             value={endDate}
-            onChange={(event) => setEndDate(event.target.value)}
+            onChange={(event) => {
+              setEndDate(event.target.value);
+              setPage(1);
+            }}
             className="h-9 rounded-md border border-neutral-300 bg-white px-2 text-xs text-neutral-700"
           />
           <select
             value={replyFilter}
-            onChange={(event) => setReplyFilter(event.target.value as typeof replyFilter)}
+            onChange={(event) => {
+              setReplyFilter(event.target.value as typeof replyFilter);
+              setPage(1);
+            }}
             className="h-9 rounded-md border border-neutral-300 bg-white px-2 text-xs text-neutral-700"
           >
             <option value="all">전체</option>
             <option value="pending">답변 대기</option>
             <option value="answered">답변 완료</option>
           </select>
+          {orderIdFilter && (
+            <div className="flex items-center gap-2 rounded-full border border-neutral-300 bg-white px-3 py-1 text-xs text-neutral-600">
+              <span className="font-mono text-[11px]">{orderIdFilter.slice(0, 8).toUpperCase()}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setOrderIdFilter("");
+                  setPage(1);
+                }}
+                className="text-[11px] text-neutral-500 hover:text-neutral-700"
+              >
+                해제
+              </button>
+            </div>
+          )}
           <input
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setPage(1);
+            }}
             placeholder="이름/이메일/내용 검색"
             className="h-9 w-56 rounded-md border border-neutral-300 bg-white px-3 text-xs text-neutral-700"
           />
-          {(query || startDate || endDate || replyFilter !== "all") && (
+          {(query || startDate || endDate || replyFilter !== "all" || orderIdFilter) && (
             <button
               type="button"
               onClick={() => {
@@ -145,6 +191,8 @@ export function AdminDashboard({
                 setStartDate("");
                 setEndDate("");
                 setReplyFilter("all");
+                setOrderIdFilter("");
+                setPage(1);
               }}
               className="h-9 rounded-md border border-neutral-300 px-3 text-xs text-neutral-700 hover:bg-neutral-50"
             >
@@ -165,7 +213,7 @@ export function AdminDashboard({
           </tr>
         </thead>
         <tbody className="divide-y divide-neutral-100">
-          {filtered.map((inq) => {
+          {inquiries.map((inq) => {
             const isNew = !inq.replyMessage && new Date(inq.createdAt).getTime() > highlightCutoff;
             return (
             <tr key={inq.id} className={isNew ? "bg-amber-50/40 hover:bg-amber-50/70" : "hover:bg-neutral-50"}>
@@ -205,7 +253,7 @@ export function AdminDashboard({
               </td>
             </tr>
           )})}
-          {filtered.length === 0 && (
+          {inquiries.length === 0 && (
             <tr>
               <td className="px-4 py-6 text-center text-neutral-500" colSpan={6}>
                 조건에 맞는 문의가 없습니다.
@@ -214,6 +262,29 @@ export function AdminDashboard({
           )}
         </tbody>
       </table>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 px-4 py-3 text-xs text-neutral-500">
+        <span>
+          총 {filteredTotal}건 · 페이지 {currentPage} / {totalPages}
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+            disabled={currentPage <= 1}
+            className="rounded-md border border-neutral-300 px-3 py-1 text-xs text-neutral-700 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            이전
+          </button>
+          <button
+            type="button"
+            onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+            disabled={currentPage >= totalPages}
+            className="rounded-md border border-neutral-300 px-3 py-1 text-xs text-neutral-700 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            다음
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

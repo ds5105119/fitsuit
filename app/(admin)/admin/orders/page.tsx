@@ -8,14 +8,22 @@ export const metadata = {
 async function AdminOrdersLoader({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string | string[]; q?: string | string[]; start?: string | string[]; end?: string | string[] }>;
+  searchParams: Promise<{
+    status?: string | string[];
+    q?: string | string[];
+    start?: string | string[];
+    end?: string | string[];
+    page?: string | string[];
+  }>;
 }) {
   const resolved = await searchParams;
+  const page = typeof resolved?.page === "string" ? Number.parseInt(resolved.page, 10) : undefined;
   const initialFilters = {
     status: typeof resolved?.status === "string" ? resolved.status : undefined,
     q: typeof resolved?.q === "string" ? resolved.q : undefined,
     start: typeof resolved?.start === "string" ? resolved.start : undefined,
     end: typeof resolved?.end === "string" ? resolved.end : undefined,
+    page: Number.isFinite(page) && page && page > 0 ? page : undefined,
   };
   return <AdminOrdersDashboard initialFilters={initialFilters} />;
 }
@@ -23,7 +31,13 @@ async function AdminOrdersLoader({
 export default function AdminOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string | string[]; q?: string | string[]; start?: string | string[]; end?: string | string[] }>;
+  searchParams: Promise<{
+    status?: string | string[];
+    q?: string | string[];
+    start?: string | string[];
+    end?: string | string[];
+    page?: string | string[];
+  }>;
 }) {
   return (
     <main className="min-h-screen w-full bg-neutral-50 px-4 py-6 text-neutral-900 md:px-10 md:py-8">

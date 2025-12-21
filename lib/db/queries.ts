@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, isNotNull, isNull, lte, notInArray, or, sql } from "drizzle-orm";
 import { db } from "./client";
 import { conciergeOrder, inquiry, userProfile } from "./schema";
 import { StoredSelections, WearCategory } from "@/components/ai-configurator/types";
@@ -90,6 +90,133 @@ export async function updateInquiryReply({
   return row ?? null;
 }
 
+type AdminInquiryFilters = {
+  q?: string;
+  start?: Date;
+  end?: Date;
+  reply?: "pending" | "answered";
+  orderId?: string;
+};
+
+type AdminOrderFilters = {
+  q?: string;
+  start?: Date;
+  end?: Date;
+  status?: OrderStatus;
+};
+
+function buildInquiryWhere(filters?: AdminInquiryFilters) {
+  if (!filters) return undefined;
+  const conditions = [];
+
+  if (filters.start) {
+    conditions.push(gte(inquiry.createdAt, filters.start));
+  }
+  if (filters.end) {
+    conditions.push(lte(inquiry.createdAt, filters.end));
+  }
+  if (filters.orderId) {
+    conditions.push(eq(inquiry.orderId, filters.orderId));
+  }
+  if (filters.reply === "pending") {
+    conditions.push(isNull(inquiry.replyMessage));
+  }
+  if (filters.reply === "answered") {
+    conditions.push(isNotNull(inquiry.replyMessage));
+  }
+  if (filters.q) {
+    const like = `%${filters.q}%`;
+    conditions.push(
+      or(
+        ilike(inquiry.name, like),
+        ilike(inquiry.email, like),
+        ilike(inquiry.phone, like),
+        ilike(inquiry.message, like),
+        ilike(sql<string>`${inquiry.orderId}::text`, like)
+      )
+    );
+  }
+
+  return conditions.length ? and(...conditions) : undefined;
+}
+
+function buildOrderWhere(filters?: AdminOrderFilters) {
+  if (!filters) return undefined;
+  const conditions = [];
+
+  if (filters.start) {
+    conditions.push(gte(conciergeOrder.createdAt, filters.start));
+  }
+  if (filters.end) {
+    conditions.push(lte(conciergeOrder.createdAt, filters.end));
+  }
+  if (filters.status) {
+    conditions.push(eq(conciergeOrder.status, filters.status));
+  }
+  if (filters.q) {
+    const like = `%${filters.q}%`;
+    conditions.push(
+      or(
+        ilike(sql<string>`${conciergeOrder.id}::text`, like),
+        ilike(conciergeOrder.userEmail, like),
+        ilike(conciergeOrder.userName, like),
+        ilike(conciergeOrder.status, like)
+      )
+    );
+  }
+
+  return conditions.length ? and(...conditions) : undefined;
+}
+
+export async function listInquiriesForAdminPage({
+  page,
+  pageSize,
+  filters,
+}: {
+  page: number;
+  pageSize: number;
+  filters?: AdminInquiryFilters;
+}) {
+  const whereClause = buildInquiryWhere(filters);
+  const totalQuery = db.select({ count: sql<number>`count(*)` }).from(inquiry);
+  const pendingQuery = db
+    .select({ count: sql<number>`count(*)` })
+    .from(inquiry)
+    .where(isNull(inquiry.replyMessage));
+  const filteredCountQuery = whereClause
+    ? db.select({ count: sql<number>`count(*)` }).from(inquiry).where(whereClause)
+    : db.select({ count: sql<number>`count(*)` }).from(inquiry);
+
+  const [totalRows, pendingRows, filteredRows] = await Promise.all([
+    totalQuery,
+    pendingQuery,
+    filteredCountQuery,
+  ]);
+
+  const total = Number(totalRows[0]?.count ?? 0);
+  const pendingCount = Number(pendingRows[0]?.count ?? 0);
+  const filteredTotal = Number(filteredRows[0]?.count ?? 0);
+  const totalPages = Math.max(1, Math.ceil(filteredTotal / pageSize));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const offset = (safePage - 1) * pageSize;
+
+  const dataQuery = whereClause
+    ? db.select().from(inquiry).where(whereClause)
+    : db.select().from(inquiry);
+  const inquiries = await dataQuery
+    .orderBy(desc(inquiry.createdAt))
+    .limit(pageSize)
+    .offset(offset);
+
+  return {
+    inquiries,
+    total,
+    filteredTotal,
+    pendingCount,
+    page: safePage,
+  };
+}
+
 export async function saveConciergeOrder(data: NewConciergeOrder) {
   const selections: StoredSelections = data.selections.map((s) => ({
     category: s.category as WearCategory,
@@ -144,6 +271,55 @@ export async function getConciergeOrderForUser({
 
 export async function listConciergeOrdersForAdmin() {
   return db.select().from(conciergeOrder).orderBy(sql`"createdAt" DESC`);
+}
+
+export async function listConciergeOrdersForAdminPage({
+  page,
+  pageSize,
+  filters,
+}: {
+  page: number;
+  pageSize: number;
+  filters?: AdminOrderFilters;
+}) {
+  const whereClause = buildOrderWhere(filters);
+  const totalQuery = db.select({ count: sql<number>`count(*)` }).from(conciergeOrder);
+  const inProgressQuery = db
+    .select({ count: sql<number>`count(*)` })
+    .from(conciergeOrder)
+    .where(notInArray(conciergeOrder.status, ["완료", "취소"]));
+  const filteredCountQuery = whereClause
+    ? db.select({ count: sql<number>`count(*)` }).from(conciergeOrder).where(whereClause)
+    : db.select({ count: sql<number>`count(*)` }).from(conciergeOrder);
+
+  const [totalRows, inProgressRows, filteredRows] = await Promise.all([
+    totalQuery,
+    inProgressQuery,
+    filteredCountQuery,
+  ]);
+
+  const total = Number(totalRows[0]?.count ?? 0);
+  const inProgressCount = Number(inProgressRows[0]?.count ?? 0);
+  const filteredTotal = Number(filteredRows[0]?.count ?? 0);
+  const totalPages = Math.max(1, Math.ceil(filteredTotal / pageSize));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const offset = (safePage - 1) * pageSize;
+
+  const dataQuery = whereClause
+    ? db.select().from(conciergeOrder).where(whereClause)
+    : db.select().from(conciergeOrder);
+  const orders = await dataQuery
+    .orderBy(desc(conciergeOrder.createdAt))
+    .limit(pageSize)
+    .offset(offset);
+
+  return {
+    orders,
+    total,
+    filteredTotal,
+    inProgressCount,
+    page: safePage,
+  };
 }
 
 export async function getConciergeOrderById(id: string) {

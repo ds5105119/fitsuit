@@ -14,7 +14,20 @@ type ConciergeOrder = {
   measurements: unknown;
 };
 
-type State = { status: "loading" } | { status: "error"; message: string } | { status: "ready"; orders: ConciergeOrder[] };
+type State =
+  | { status: "loading" }
+  | { status: "error"; message: string }
+  | {
+      status: "ready";
+      orders: ConciergeOrder[];
+      total: number;
+      filteredTotal: number;
+      inProgressCount: number;
+      page: number;
+      pageSize: number;
+    };
+
+const PAGE_SIZE = 20;
 
 export function AdminOrdersDashboard({
   initialFilters,
@@ -24,6 +37,7 @@ export function AdminOrdersDashboard({
     q?: string;
     start?: string;
     end?: string;
+    page?: number;
   };
 }) {
   const router = useRouter();
@@ -32,10 +46,20 @@ export function AdminOrdersDashboard({
   const [startDate, setStartDate] = useState(initialFilters?.start ?? "");
   const [endDate, setEndDate] = useState(initialFilters?.end ?? "");
   const [statusFilter, setStatusFilter] = useState(initialFilters?.status ?? "all");
+  const [page, setPage] = useState(initialFilters?.page ?? 1);
 
   useEffect(() => {
     const load = async () => {
-      const res = await fetch("/api/admin/orders", { cache: "no-store" });
+      const params = new URLSearchParams();
+      params.set("page", String(page));
+      params.set("pageSize", String(PAGE_SIZE));
+      const trimmed = query.trim();
+      if (trimmed) params.set("q", trimmed);
+      if (startDate) params.set("start", startDate);
+      if (endDate) params.set("end", endDate);
+      if (statusFilter !== "all") params.set("status", statusFilter);
+
+      const res = await fetch(`/api/admin/orders?${params.toString()}`, { cache: "no-store" });
       if (res.status === 401) {
         router.replace("/admin/login");
         return;
@@ -45,10 +69,22 @@ export function AdminOrdersDashboard({
         return;
       }
       const data = await res.json().catch(() => null);
-      setState({ status: "ready", orders: data?.orders ?? [] });
+      const nextPage = Number(data?.page ?? page);
+      if (Number.isFinite(nextPage) && nextPage !== page) {
+        setPage(nextPage);
+      }
+      setState({
+        status: "ready",
+        orders: data?.orders ?? [],
+        total: Number(data?.total ?? 0),
+        filteredTotal: Number(data?.filteredTotal ?? 0),
+        inProgressCount: Number(data?.inProgressCount ?? 0),
+        page: Number.isFinite(nextPage) ? nextPage : page,
+        pageSize: Number(data?.pageSize ?? PAGE_SIZE),
+      });
     };
     load();
-  }, [router]);
+  }, [router, endDate, page, query, startDate, statusFilter]);
 
   const formatter = useMemo(
     () =>
@@ -60,22 +96,12 @@ export function AdminOrdersDashboard({
   );
 
   const orders = state.status === "ready" ? state.orders : [];
-  const inProgressCount = orders.filter((order) => !["완료", "취소"].includes(order.status)).length;
-
-  const filtered = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    const start = startDate ? new Date(`${startDate}T00:00:00`) : null;
-    const end = endDate ? new Date(`${endDate}T23:59:59.999`) : null;
-    return orders.filter((order) => {
-      const created = new Date(order.createdAt);
-      if (start && created < start) return false;
-      if (end && created > end) return false;
-      if (statusFilter !== "all" && order.status !== statusFilter) return false;
-      if (!normalizedQuery) return true;
-      const haystack = [order.id, order.userName ?? "", order.userEmail, order.status].join(" ").toLowerCase();
-      return haystack.includes(normalizedQuery);
-    });
-  }, [endDate, orders, query, startDate, statusFilter]);
+  const total = state.status === "ready" ? state.total : 0;
+  const filteredTotal = state.status === "ready" ? state.filteredTotal : 0;
+  const inProgressCount = state.status === "ready" ? state.inProgressCount : 0;
+  const pageSize = state.status === "ready" ? state.pageSize : PAGE_SIZE;
+  const currentPage = state.status === "ready" ? state.page : page;
+  const totalPages = Math.max(1, Math.ceil(filteredTotal / pageSize));
 
   const highlightCutoff = Date.now() - 24 * 60 * 60 * 1000;
 
@@ -93,26 +119,35 @@ export function AdminOrdersDashboard({
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Orders</p>
           <p className="text-sm text-neutral-500">
-            전체 {orders.length} · 진행중 {inProgressCount} · 필터 {filtered.length}
+            전체 {total} · 진행중 {inProgressCount} · 필터 {filteredTotal}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <input
             type="date"
             value={startDate}
-            onChange={(event) => setStartDate(event.target.value)}
+            onChange={(event) => {
+              setStartDate(event.target.value);
+              setPage(1);
+            }}
             className="h-9 rounded-md border border-neutral-300 bg-white px-2 text-xs text-neutral-700"
           />
           <span className="text-xs text-neutral-400">~</span>
           <input
             type="date"
             value={endDate}
-            onChange={(event) => setEndDate(event.target.value)}
+            onChange={(event) => {
+              setEndDate(event.target.value);
+              setPage(1);
+            }}
             className="h-9 rounded-md border border-neutral-300 bg-white px-2 text-xs text-neutral-700"
           />
           <select
             value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
+            onChange={(event) => {
+              setStatusFilter(event.target.value);
+              setPage(1);
+            }}
             className="h-9 rounded-md border border-neutral-300 bg-white px-2 text-xs text-neutral-700"
           >
             <option value="all">전체</option>
@@ -124,7 +159,10 @@ export function AdminOrdersDashboard({
           </select>
           <input
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setPage(1);
+            }}
             placeholder="주문번호/고객/이메일 검색"
             className="h-9 w-56 rounded-md border border-neutral-300 bg-white px-3 text-xs text-neutral-700"
           />
@@ -136,6 +174,7 @@ export function AdminOrdersDashboard({
                 setStartDate("");
                 setEndDate("");
                 setStatusFilter("all");
+                setPage(1);
               }}
               className="h-9 rounded-md border border-neutral-300 px-3 text-xs text-neutral-700 hover:bg-neutral-50"
             >
@@ -157,7 +196,7 @@ export function AdminOrdersDashboard({
           </tr>
         </thead>
         <tbody className="divide-y divide-neutral-100">
-          {filtered.map((o) => {
+          {orders.map((o) => {
             const hasMeasurements = o.measurements && typeof o.measurements === "object" ? Object.values(o.measurements as any).some(Boolean) : false;
             const isNew = new Date(o.createdAt).getTime() > highlightCutoff;
 
@@ -185,7 +224,7 @@ export function AdminOrdersDashboard({
             );
           })}
 
-          {filtered.length === 0 && (
+          {orders.length === 0 && (
             <tr>
               <td className="px-4 py-6 text-center text-neutral-500" colSpan={6}>
                 조건에 맞는 주문이 없습니다.
@@ -194,6 +233,29 @@ export function AdminOrdersDashboard({
           )}
         </tbody>
       </table>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 px-4 py-3 text-xs text-neutral-500">
+        <span>
+          총 {filteredTotal}건 · 페이지 {currentPage} / {totalPages}
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+            disabled={currentPage <= 1}
+            className="rounded-md border border-neutral-300 px-3 py-1 text-xs text-neutral-700 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            이전
+          </button>
+          <button
+            type="button"
+            onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+            disabled={currentPage >= totalPages}
+            className="rounded-md border border-neutral-300 px-3 py-1 text-xs text-neutral-700 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            다음
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

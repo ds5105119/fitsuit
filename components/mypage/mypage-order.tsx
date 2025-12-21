@@ -131,11 +131,12 @@ export async function MyPageOrder() {
           </div>
         ))}
         {orders.length === 0 && (
-          <tr>
-            <td colSpan={5} className="px-4 py-10 text-center text-neutral-500">
-              아직 주문이 없습니다. AI 정장 맞추기에서 컨시어지 주문을 전송해 보세요.
-            </td>
-          </tr>
+          <div className="flex flex-col justify-center items-center space-y-6 pt-32 lg:pt-56">
+            <p className="font-semibold">아직 주문된 상품이 없네요!</p>
+            <Link href="/">
+              <button className="bg-sky-500 text-white rounded-lg px-12 lg:py-16 py-3">홈으로 돌아가기</button>
+            </Link>
+          </div>
         )}
       </div>
     </section>
