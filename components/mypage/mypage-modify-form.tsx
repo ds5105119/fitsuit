@@ -294,7 +294,7 @@ export function MyPageModifyForm({ email, initialProfile }: { email: string; ini
           <button
             type="submit"
             disabled={saving}
-            className="rounded-md bg-sky-500 w-full lg:w-fit px-12 py-2 lg:py-3 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-md bg-sky-500 px-12 py-3 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saving ? "저장 중..." : "저장"}
           </button>
