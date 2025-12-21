@@ -171,6 +171,22 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        <section className="bg-neutral-900 text-white flex border-b border-neutral-600 flex-col lg:flex-row">
+          <Link href="/showroom" className="w-full lg:w-1/2 flex flex-col space-y-2 pl-6 lg:pl-12 py-6 justify-center">
+            <p className="text-2xl lg:text-4xl font-semibold">매장 찾기</p>
+            <p className="text-sm">서울 - 파르나스</p>
+            <p className="text-xs lg:text-sm leading-normal">
+              ​서울시 강남구 봉은사로 <br />
+              524 웨스틴 서울 파르나스 <br />
+              지하아케이드 B2 C-17 <br />
+              골드핑거 양복점
+            </p>
+          </Link>
+          <div className="w-full lg:w-1/2 aspect-video relative">
+            <Image src="/images/매장 모습.avif" alt="매장 모습" fill className="object-cover" />
+          </div>
+        </section>
       </main>
     </LenisProvider>
   );
