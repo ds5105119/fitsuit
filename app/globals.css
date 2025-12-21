@@ -175,6 +175,10 @@
 }
 
 @layer utilities {
+  .font-instrument {
+    font-family: var(--font-instrument), serif;
+  }
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none !important;
     width: 0 !important;

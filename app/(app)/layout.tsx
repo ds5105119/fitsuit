@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { Suspense } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -31,10 +31,11 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
 });
 
-const playfair = Playfair_Display({
+const instrument = Instrument_Serif({
+  weight: "400",
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-playfair",
+  variable: "--font-instrument",
 });
 
 export default function RootLayout({
@@ -43,7 +44,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html className={`${geist.variable} ${geistMono.variable} ${playfair.variable}`} lang="en" suppressHydrationWarning>
+    <html className={`${geist.variable} ${geistMono.variable} ${instrument.variable}`} lang="ko" suppressHydrationWarning>
       <TooltipProvider>
         <body className="antialiased bg-white">
           <SessionProvider>

@@ -14,14 +14,20 @@ export const cardItems = [
   {
     alt: "원단 선택 사진",
     src: "/images/Bespoke_06 재단2_JPG.avif",
+    title: "비스포크 과정",
+    discription: "재단",
   },
   {
     alt: "이정구 명장 사진",
     src: "/images/Bespoke_08 가봉.avif",
+    title: "비스포크 과정",
+    discription: "가봉",
   },
   {
     alt: "손바느질 마감 사진",
     src: "/images/Bespoke_12 손바느질 마감.avif",
+    title: "비스포크 과정",
+    discription: "손바느질 마감",
   },
 ];
 

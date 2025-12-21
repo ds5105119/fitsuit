@@ -134,7 +134,7 @@ export async function MyPageOrder() {
           <div className="flex flex-col justify-center items-center space-y-6 pt-32 lg:pt-56">
             <p className="font-semibold">아직 주문된 상품이 없네요!</p>
             <Link href="/">
-              <button className="bg-sky-500 text-white rounded-lg px-12 lg:px-16 py-3">홈으로 돌아가기</button>
+              <button className="bg-sky-500 text-white rounded-lg px-12 lg:px-16 py-3 cursor-pointer">홈으로 돌아가기</button>
             </Link>
           </div>
         )}
