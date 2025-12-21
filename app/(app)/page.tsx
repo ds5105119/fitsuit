@@ -153,7 +153,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="w-full flex flex-col space-y-36 pt-12">
+            <div className="w-full flex flex-col space-y-16 lg:space-y-36 pt-12">
               {bespokeSteps.map((step, idx) => (
                 <div key={step.title} className={cn("lg:w-[75%] grid items-center gap-10 lg:gap-0 lg:grid-cols-9", idx % 2 == 0 && "ml-auto")}>
                   <div className={cn("flex flex-col gap-6 lg:col-span-5 lg:pr-10")}>
