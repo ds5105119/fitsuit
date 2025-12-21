@@ -159,7 +159,10 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        </section>
 
+        <section className="w-full bg-white text-black pt-36">
+          {" "}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-6">
             <div className="order-2 lg:order-1 lg:col-span-1">
               <div className="relative aspect-square w-full overflow-hidden">
