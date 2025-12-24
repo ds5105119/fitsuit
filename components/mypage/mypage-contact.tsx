@@ -4,17 +4,11 @@ import { auth } from "@/auth";
 import { getConciergeOrderForUser, getUserProfileByEmail, listInquiriesForUser } from "@/lib/db/queries";
 import { cn } from "@/lib/utils";
 import { MyPageInquiryDialog } from "./mypage-inquiry-dialog";
+import { MyPageInquiryDeleteButton } from "./mypage-inquiry-delete-button";
 
 function formatDate(input: Date) {
   return new Intl.DateTimeFormat("ko-KR", {
     dateStyle: "medium",
-  }).format(input);
-}
-
-function formatDateTime(input: Date) {
-  return new Intl.DateTimeFormat("ko-KR", {
-    dateStyle: "medium",
-    timeStyle: "short",
   }).format(input);
 }
 
@@ -26,10 +20,7 @@ export async function MyPageContact({ orderId }: { orderId?: string }) {
     redirect("/mypage/login?callbackUrl=/mypage/contact");
   }
 
-  const [profile, inquiries] = await Promise.all([
-    getUserProfileByEmail(email),
-    listInquiriesForUser(email),
-  ]);
+  const [profile, inquiries] = await Promise.all([getUserProfileByEmail(email), listInquiriesForUser(email)]);
 
   let order = null;
   let orderError = false;
@@ -44,7 +35,6 @@ export async function MyPageContact({ orderId }: { orderId?: string }) {
     }
   }
 
-  const userName = profile?.userName ?? session?.user?.name ?? "고객";
   const phone = profile?.phone ?? "";
 
   return (
@@ -55,8 +45,6 @@ export async function MyPageContact({ orderId }: { orderId?: string }) {
           <p className="text-xs text-neutral-500">답변은 알림 없이 내역에서 확인 가능합니다.</p>
         </div>
         <MyPageInquiryDialog
-          email={email}
-          userName={userName}
           phone={phone}
           order={order}
           orderError={orderError}
@@ -66,32 +54,45 @@ export async function MyPageContact({ orderId }: { orderId?: string }) {
         />
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         {inquiries.map((inq) => (
           <div key={inq.id} className="flex flex-col rounded-xl border border-neutral-200 bg-white p-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm lg:text-base font-semibold">{formatDate(new Date(inq.createdAt))}</p>
-                <p className="text-xs text-neutral-500">문의 번호: {inq.id.slice(0, 8).toUpperCase()}</p>
+            <div className="flex justify-between rounded-lg bg-neutral-50 px-4 py-3 text-sm text-neutral-700">
+              <div className="flex space-x-3">
+                <div className="size-[1.7rem] flex items-center justify-center rounded-full bg-black text-white shrink-0">Q</div>
+                <div className="mt-1 flex flex-col space-y-2">
+                  <p className={cn("w-fit text-sm font-semibold", inq.replyMessage ? "text-sky-600" : "text-neutral-500")}>
+                    {inq.replyMessage ? "답변 완료" : "답변 대기"}
+                  </p>
+                  <p className={cn("w-fit text-xs font-semibold", inq.orderId ? "text-sky-600" : "text-yellow-600")}>
+                    {inq.orderId ? "상품 상세 문의" : "일반 문의"}
+                  </p>
+                  <p>{inq.message}</p>
+                  {(() => {
+                    const urls = Array.isArray(inq.attachmentUrls) ? inq.attachmentUrls : inq.attachmentUrl ? [inq.attachmentUrl] : [];
+                    if (urls.length === 0) return null;
+                    return (
+                      <div className="flex flex-wrap gap-2">
+                        {urls.map((url) => (
+                          <a key={url} href={url} target="_blank" rel="noreferrer">
+                            <img src={url} alt="문의 첨부 이미지" className="h-20 w-20 rounded-md border border-neutral-200 object-cover" loading="lazy" />
+                          </a>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                  <p className="text-xs font-semibold">{formatDate(new Date(inq.createdAt))}</p>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                {inq.orderId ? (
-                  <span className="rounded-md bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-600">
-                    주문 문의
-                  </span>
-                ) : (
-                  <span className="rounded-md bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-500">
-                    일반 문의
-                  </span>
-                )}
-                <span
-                  className={cn(
-                    "rounded-md px-3 py-1 text-xs font-semibold",
-                    inq.replyMessage ? "bg-sky-100 text-sky-600" : "bg-amber-100 text-amber-600"
-                  )}
-                >
-                  {inq.replyMessage ? "답변 완료" : "답변 대기"}
-                </span>
+              <MyPageInquiryDeleteButton inquiryId={inq.id} className="text-sm h-fit mt-1 text-neutral-500 hover:text-neutral-800" />
+            </div>
+
+            <div className="flex rounded-lg bg-neutral-50 px-4 py-3 text-sm text-neutral-700 space-x-3">
+              <div className="size-[1.7rem] flex items-center justify-center rounded-full bg-black text-white shrink-0">A</div>
+              <div className="mt-1 flex flex-col space-y-2">
+                <p className="text-sm font-semibold text-neutral-500">관리자 답변</p>
+                <p className="whitespace-pre-line">{inq.replyMessage ?? "아직 답변이 없어요"}</p>
+                {inq.replyUpdatedAt && <p className="text-xs font-semibold">{formatDate(new Date(inq.replyUpdatedAt))}</p>}
               </div>
             </div>
 
@@ -104,23 +105,6 @@ export async function MyPageContact({ orderId }: { orderId?: string }) {
                 <Link href={`/mypage/orders/${inq.orderId}`} className="text-xs font-semibold text-sky-600 hover:underline">
                   주문 상세 보기 →
                 </Link>
-              </div>
-            )}
-
-            <div className="rounded-lg bg-neutral-50 px-4 py-3 text-sm text-neutral-700">
-              {inq.message}
-            </div>
-
-            {inq.replyMessage ? (
-              <div className="rounded-lg bg-blue-50 px-4 py-3 text-sm text-neutral-700">
-                <p className="text-xs font-semibold text-neutral-500">
-                  관리자 답변 · {inq.replyUpdatedAt ? formatDateTime(new Date(inq.replyUpdatedAt)) : "방금 전"}
-                </p>
-                <p className="mt-2 whitespace-pre-line">{inq.replyMessage}</p>
-              </div>
-            ) : (
-              <div className="text-xs text-neutral-500">
-                답변이 등록되면 이곳에서 확인할 수 있습니다.
               </div>
             )}
           </div>

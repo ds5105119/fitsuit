@@ -36,6 +36,20 @@
       "when": 1766246954026,
       "tag": "0004_nervous_invaders",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1766560887954,
+      "tag": "0005_ambitious_frightful_four",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1766561597472,
+      "tag": "0006_misty_xavin",
+      "breakpoints": true
     }
   ]
 }

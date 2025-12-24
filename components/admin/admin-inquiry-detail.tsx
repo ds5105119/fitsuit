@@ -12,7 +12,9 @@ type Inquiry = {
   name: string;
   email: string;
   phone: string | null;
+  category: string;
   message: string;
+  attachmentUrls: string[] | null;
   attachmentUrl: string | null;
   replyMessage: string | null;
   replyUpdatedAt: string | null;
@@ -119,16 +121,37 @@ export function AdminInquiryDetail({ inquiryId }: { inquiryId: string }) {
             <div className="rounded-lg bg-neutral-50 px-4 py-3 text-sm text-neutral-700">
               {inquiry.message}
             </div>
-            {inquiry.attachmentUrl && (
-              <a
-                href={inquiry.attachmentUrl}
-                className="text-sm text-neutral-900 underline underline-offset-4"
-                target="_blank"
-                rel="noreferrer"
-              >
-                첨부 파일 보기
-              </a>
-            )}
+            {(() => {
+              const urls = Array.isArray(inquiry.attachmentUrls)
+                ? inquiry.attachmentUrls
+                : inquiry.attachmentUrl
+                  ? [inquiry.attachmentUrl]
+                  : [];
+              if (urls.length === 0) return null;
+              return (
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold text-neutral-500">첨부 이미지</p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {urls.map((url) => (
+                      <a
+                        key={url}
+                        href={url}
+                        className="inline-flex"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <img
+                          src={url}
+                          alt="문의 첨부 이미지"
+                          className="max-h-64 w-full rounded-lg border border-neutral-200 object-contain"
+                          loading="lazy"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
 
@@ -149,6 +172,10 @@ export function AdminInquiryDetail({ inquiryId }: { inquiryId: string }) {
             <div className="flex justify-between">
               <span className="text-neutral-500">연락처</span>
               <span className="font-semibold">{inquiry.phone || "-"}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-neutral-500">문의 유형</span>
+              <span className="font-semibold">{inquiry.category}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-neutral-500">주문</span>

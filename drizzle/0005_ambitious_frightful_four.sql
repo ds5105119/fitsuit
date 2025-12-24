@@ -1,0 +1,1 @@
+ALTER TABLE "Inquiry" ADD COLUMN "category" varchar(32) DEFAULT '기타' NOT NULL;

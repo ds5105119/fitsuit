@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { INQUIRY_CATEGORIES } from "@/lib/inquiry";
 
 type FormState = "idle" | "submitting" | "success" | "error";
 
@@ -74,6 +75,24 @@ export function ContactForm() {
 
       <label className="space-y-2 text-sm text-white/80">
         <span className="block text-xs uppercase tracking-[0.2em] text-amber-200">
+          문의 종류 *
+        </span>
+        <select
+          required
+          name="category"
+          className="w-full rounded-xl border border-white/15 bg-black/40 px-3 py-2 text-white outline-none ring-amber-300/40 focus:border-amber-200 focus:ring-2"
+        >
+          <option value="">문의 종류를 선택해주세요.</option>
+          {INQUIRY_CATEGORIES.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="space-y-2 text-sm text-white/80">
+        <span className="block text-xs uppercase tracking-[0.2em] text-amber-200">
           문의 내용 *
         </span>
         <textarea
@@ -87,14 +106,16 @@ export function ContactForm() {
 
       <label className="space-y-2 text-sm text-white/80">
         <span className="block text-xs uppercase tracking-[0.2em] text-amber-200">
-          참고 파일 업로드
+          참고 이미지 업로드
         </span>
         <input
-          name="attachment"
+          name="attachments"
           type="file"
+          accept="image/*"
+          multiple
           className="w-full cursor-pointer rounded-xl border border-white/15 bg-black/40 px-3 py-2 text-white file:mr-3 file:cursor-pointer file:rounded-lg file:border-none file:bg-amber-400 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-black hover:file:bg-amber-300"
         />
-        <p className="text-xs text-white/50">룩북, 원단 사진 등 첨부 가능</p>
+        <p className="text-xs text-white/50">룩북, 원단 사진 등 이미지 파일만 첨부 가능 (장당 최대 8MB, 최대 10장)</p>
       </label>
 
       <div className="flex items-center gap-3">

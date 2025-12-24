@@ -29,7 +29,6 @@ export async function MyPageOrder() {
   }
 
   const [orders, profile] = await Promise.all([listConciergeOrdersForUser(email), getUserProfileByEmail(email)]);
-  const userName = profile?.userName ?? session?.user?.name ?? "고객";
   const phone = profile?.phone ?? "";
 
   return (
@@ -98,8 +97,6 @@ export async function MyPageOrder() {
                   className="col-span-1 flex items-center justify-center text-sm font-semibold shadow-[inset_0_0_0_1px_rgb(229_229_229)] py-2 lg:w-36 rounded-md hover:bg-neutral-100"
                 />
                 <MyPageInquiryDialog
-                  email={email}
-                  userName={userName}
                   phone={phone}
                   order={{ id: order.id }}
                   orderError={false}

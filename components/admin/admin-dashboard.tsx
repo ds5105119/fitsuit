@@ -10,7 +10,9 @@ type Inquiry = {
   name: string;
   email: string;
   phone: string | null;
+  category: string;
   message: string;
+  attachmentUrls: string[] | null;
   attachmentUrl: string | null;
   replyMessage: string | null;
   replyUpdatedAt: string | null;
@@ -180,7 +182,7 @@ export function AdminDashboard({
               setQuery(event.target.value);
               setPage(1);
             }}
-            placeholder="이름/이메일/내용 검색"
+            placeholder="이름/이메일/내용/유형 검색"
             className="h-9 w-56 rounded-md border border-neutral-300 bg-white px-3 text-xs text-neutral-700"
           />
           {(query || startDate || endDate || replyFilter !== "all" || orderIdFilter) && (
@@ -207,6 +209,7 @@ export function AdminDashboard({
             <th className="px-4 py-3">날짜</th>
             <th className="px-4 py-3">이름</th>
             <th className="px-4 py-3">주문</th>
+            <th className="px-4 py-3">유형</th>
             <th className="px-4 py-3">메시지</th>
             <th className="px-4 py-3">답변</th>
             <th className="px-4 py-3">관리</th>
@@ -215,6 +218,11 @@ export function AdminDashboard({
         <tbody className="divide-y divide-neutral-100">
           {inquiries.map((inq) => {
             const isNew = !inq.replyMessage && new Date(inq.createdAt).getTime() > highlightCutoff;
+            const attachmentCount = Array.isArray(inq.attachmentUrls)
+              ? inq.attachmentUrls.length
+              : inq.attachmentUrl
+                ? 1
+                : 0;
             return (
             <tr key={inq.id} className={isNew ? "bg-amber-50/40 hover:bg-amber-50/70" : "hover:bg-neutral-50"}>
               <td className="px-4 py-3 text-neutral-600">{formatter.format(new Date(inq.createdAt))}</td>
@@ -233,7 +241,17 @@ export function AdminDashboard({
                 )}
               </td>
               <td className="px-4 py-3">
+                <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-600">
+                  {inq.category}
+                </span>
+              </td>
+              <td className="px-4 py-3">
                 <div className="line-clamp-3 text-neutral-700">{inq.message}</div>
+                {attachmentCount > 0 && (
+                  <span className="mt-2 inline-flex items-center rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-600">
+                    사진 {attachmentCount}
+                  </span>
+                )}
               </td>
               <td className="px-4 py-3">
                 <span
@@ -255,7 +273,7 @@ export function AdminDashboard({
           )})}
           {inquiries.length === 0 && (
             <tr>
-              <td className="px-4 py-6 text-center text-neutral-500" colSpan={6}>
+              <td className="px-4 py-6 text-center text-neutral-500" colSpan={7}>
                 조건에 맞는 문의가 없습니다.
               </td>
             </tr>

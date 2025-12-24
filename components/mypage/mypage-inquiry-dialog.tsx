@@ -9,8 +9,6 @@ type OrderSummary = {
 };
 
 export function MyPageInquiryDialog({
-  email,
-  userName,
   phone,
   order,
   orderError,
@@ -18,8 +16,6 @@ export function MyPageInquiryDialog({
   triggerClassName,
   defaultOpen = false,
 }: {
-  email: string;
-  userName: string;
   phone: string;
   order: OrderSummary | null;
   orderError: boolean;
@@ -41,7 +37,7 @@ export function MyPageInquiryDialog({
           <DialogTitle>문의 작성</DialogTitle>
           <DialogDescription>문의 내용을 입력해 주세요.</DialogDescription>
         </DialogHeader>
-        <MyPageContactForm email={email} userName={userName} phone={phone} order={order} orderError={orderError} onSubmitted={() => setOpen(false)} />
+        <MyPageContactForm phone={phone} order={order} orderError={orderError} onSubmitted={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
   );

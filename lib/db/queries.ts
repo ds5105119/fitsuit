@@ -2,6 +2,7 @@ import { and, desc, eq, gte, ilike, isNotNull, isNull, lte, notInArray, or, sql 
 import { db } from "./client";
 import { conciergeOrder, inquiry, userProfile } from "./schema";
 import { StoredSelections, WearCategory } from "@/components/ai-configurator/types";
+import { DEFAULT_INQUIRY_CATEGORY, type InquiryCategory } from "@/lib/inquiry";
 
 export const ORDER_STATUSES = ["접수", "취소", "제작중", "견적 완료", "완료"] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
@@ -11,8 +12,10 @@ export type NewInquiry = {
   name: string;
   email: string;
   phone?: string | null;
+  category?: InquiryCategory | null;
   message: string;
   attachmentUrl?: string | null;
+  attachmentUrls?: string[] | null;
 };
 
 export type ConciergeSelectionItem = {
@@ -37,13 +40,20 @@ export type NewConciergeOrder = {
 };
 
 export async function saveInquiry(data: NewInquiry) {
+  const normalizedUrls = Array.isArray(data.attachmentUrls)
+    ? data.attachmentUrls.map((url) => url.trim()).filter(Boolean)
+    : [];
+  const primaryUrl = normalizedUrls[0] ?? data.attachmentUrl ?? null;
+
   const [row] = await db.insert(inquiry).values({
     orderId: data.orderId ?? null,
     name: data.name,
     email: data.email,
     phone: data.phone ?? null,
+    category: data.category ?? DEFAULT_INQUIRY_CATEGORY,
     message: data.message,
-    attachmentUrl: data.attachmentUrl ?? null,
+    attachmentUrl: primaryUrl,
+    attachmentUrls: normalizedUrls.length ? normalizedUrls : primaryUrl ? [primaryUrl] : null,
   }).returning();
   return row ?? null;
 }
@@ -90,6 +100,24 @@ export async function updateInquiryReply({
   return row ?? null;
 }
 
+export async function deleteInquiryByIdForUser({
+  id,
+  email,
+}: {
+  id: string;
+  email: string;
+}) {
+  const [row] = await db
+    .delete(inquiry)
+    .where(and(eq(inquiry.id, id), eq(inquiry.email, email)))
+    .returning({
+      id: inquiry.id,
+      attachmentUrl: inquiry.attachmentUrl,
+      attachmentUrls: inquiry.attachmentUrls,
+    });
+  return row ?? null;
+}
+
 type AdminInquiryFilters = {
   q?: string;
   start?: Date;
@@ -131,6 +159,7 @@ function buildInquiryWhere(filters?: AdminInquiryFilters) {
         ilike(inquiry.name, like),
         ilike(inquiry.email, like),
         ilike(inquiry.phone, like),
+        ilike(inquiry.category, like),
         ilike(inquiry.message, like),
         ilike(sql<string>`${inquiry.orderId}::text`, like)
       )
