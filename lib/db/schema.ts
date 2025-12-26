@@ -28,8 +28,20 @@ export const adminUser = pgTable("AdminUser", {
 
 export type AdminUser = InferSelectModel<typeof adminUser>;
 
-export const userProfile = pgTable("UserProfile", {
+export const userCredential = pgTable("UserCredential", {
   userEmail: varchar("userEmail", { length: 160 }).primaryKey().notNull(),
+  passwordHash: text("passwordHash").notNull(),
+  salt: text("salt").notNull(),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
+export type UserCredential = InferSelectModel<typeof userCredential>;
+
+export const userProfile = pgTable("UserProfile", {
+  userEmail: varchar("userEmail", { length: 160 })
+    .primaryKey()
+    .notNull()
+    .references(() => userCredential.userEmail, { onDelete: "cascade" }),
   userName: varchar("userName", { length: 120 }),
   phone: varchar("phone", { length: 64 }),
   address: text("address"),

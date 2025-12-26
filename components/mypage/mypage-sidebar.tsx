@@ -114,7 +114,7 @@ export default function MyPageSidebar({
 
         <hr className="border-neutral-200" />
 
-        <button className="flex items-center justify-between px-3 py-2 hover:bg-neutral-200 rounded-lg" onClick={() => signOut()}>
+        <button className="flex items-center justify-between px-3 py-2 hover:bg-neutral-200 rounded-lg" onClick={() => signOut({ redirectTo: "/" })}>
           로그아웃
         </button>
       </nav>

@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { LoginDialog } from "@/components/login-dialog";
+import { LoginDialog } from "@/components/auth/login-dialog";
 import MyPageSidebar from "@/components/mypage/mypage-sidebar";
 import { SuspenseSkeleton } from "@/components/suspense-skeleton";
 import { getUserProfileByEmail, listConciergeOrdersForUser } from "@/lib/db/queries";
@@ -20,7 +20,7 @@ async function MypageLayoutLoader({
           <div className="lg:mt-8 flex">
             <MyPageSidebar orders={undefined} session={undefined} />
 
-            <LoginDialog defaultOpen={true} callbackUrl="/mypage/orders" />
+            <LoginDialog open={true} defaultOpen={true} callbackUrl="/mypage/orders" />
           </div>
         </div>
       </main>

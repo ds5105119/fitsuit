@@ -1,4 +1,4 @@
-import { MyPageOrder } from "@/components/mypage/mypage-order";
+import { MyPageOrder } from "@/components/mypage/page/mypage-order";
 import { SuspenseSkeleton } from "@/components/suspense-skeleton";
 import { Suspense } from "react";
 

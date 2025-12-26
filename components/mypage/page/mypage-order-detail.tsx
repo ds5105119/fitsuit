@@ -3,7 +3,6 @@ import NextImage from "next/image";
 import { redirect } from "next/navigation";
 import { getConciergeOrderById } from "@/lib/db/queries";
 import { auth } from "@/auth";
-import { OrderCancelButton } from "@/components/mypage/order-cancel-button";
 
 function formatDate(input: Date) {
   return new Intl.DateTimeFormat("ko-KR", {
@@ -23,11 +22,11 @@ export async function OrderDetail({ id }: { id: string }) {
   const email = session?.user?.email;
 
   if (!email) {
-    redirect("/mypage/orders");
+    redirect("/");
   }
 
   if (!id) {
-    redirect("/mypage/orders");
+    redirect("/");
   }
 
   let order = null;

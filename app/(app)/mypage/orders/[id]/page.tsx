@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { OrderDetail } from "@/components/mypage/mypage-order-detail";
+import { OrderDetail } from "@/components/mypage/page/mypage-order-detail";
 import { SuspenseSkeleton } from "@/components/suspense-skeleton";
 
 export const metadata = {

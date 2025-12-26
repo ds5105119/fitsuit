@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { MyPageContact } from "@/components/mypage/mypage-contact";
+import { MyPageContact } from "@/components/mypage/page/mypage-contact";
 import { SuspenseSkeleton } from "@/components/suspense-skeleton";
 
 export const metadata = {

@@ -3,8 +3,8 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getConciergeOrderForUser, getUserProfileByEmail, listInquiriesForUser } from "@/lib/db/queries";
 import { cn } from "@/lib/utils";
-import { MyPageInquiryDialog } from "./mypage-inquiry-dialog";
-import { MyPageInquiryDeleteButton } from "./mypage-inquiry-delete-button";
+import { MyPageInquiryDialog } from "../mypage-inquiry-dialog";
+import { MyPageInquiryDeleteButton } from "../mypage-inquiry-delete-button";
 
 function formatDate(input: Date) {
   return new Intl.DateTimeFormat("ko-KR", {
@@ -17,7 +17,7 @@ export async function MyPageContact({ orderId }: { orderId?: string }) {
   const email = session?.user?.email;
 
   if (!email) {
-    redirect("/mypage/login?callbackUrl=/mypage/contact");
+    redirect("/");
   }
 
   const [profile, inquiries] = await Promise.all([getUserProfileByEmail(email), listInquiriesForUser(email)]);

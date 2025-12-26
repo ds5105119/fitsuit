@@ -3,9 +3,9 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getUserProfileByEmail, listConciergeOrdersForUser } from "@/lib/db/queries";
 import { auth } from "@/auth";
-import { OrderCancelButton } from "./order-cancel-button";
+import { OrderCancelButton } from "../order-cancel-button";
 import { cn } from "@/lib/utils";
-import { MyPageInquiryDialog } from "./mypage-inquiry-dialog";
+import { MyPageInquiryDialog } from "../mypage-inquiry-dialog";
 
 function formatDate(input: Date) {
   return new Intl.DateTimeFormat("ko-KR", {
@@ -25,7 +25,7 @@ export async function MyPageOrder() {
   const email = session?.user?.email;
 
   if (!email) {
-    redirect("/mypage/login?callbackUrl=/mypage");
+    redirect("/");
   }
 
   const [orders, profile] = await Promise.all([listConciergeOrdersForUser(email), getUserProfileByEmail(email)]);

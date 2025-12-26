@@ -22,7 +22,6 @@ export function MyPageInquiryDeleteButton({ inquiryId, className }: { inquiryId:
         toast.error(data?.error || "삭제에 실패했습니다.");
         return;
       }
-      toast.success("삭제되었습니다.");
       window.location.reload();
     } catch (error) {
       toast.error("삭제 중 오류가 발생했습니다.");

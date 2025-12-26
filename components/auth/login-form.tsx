@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
+import { CredentialsLoginForm } from "@/components/auth/credentials-login-form";
 
 export async function LoginForm({ searchParams }: { searchParams: Promise<{ callbackUrl?: string }> }) {
   const session = await auth();
@@ -19,7 +20,14 @@ export async function LoginForm({ searchParams }: { searchParams: Promise<{ call
             로그인하고 <br />
             간편하게 비스포크 시작하기
           </h2>
-          <div className="flex-1 px-5 py-6 sm:px-6">
+          <div className="flex-1 px-5 py-6 sm:px-6 space-y-5">
+            <CredentialsLoginForm callbackUrl={next} />
+            <div className="text-center text-xs text-neutral-500">계정이 없으신가요? 로그인 다이얼로그에서 이메일로 시작하기로 가입을 진행해주세요.</div>
+            <div className="flex items-center gap-3 text-xs text-neutral-400">
+              <span className="h-px flex-1 bg-neutral-200" />
+              또는
+              <span className="h-px flex-1 bg-neutral-200" />
+            </div>
             <form
               action={async () => {
                 "use server";
@@ -28,7 +36,7 @@ export async function LoginForm({ searchParams }: { searchParams: Promise<{ call
             >
               <button
                 type="submit"
-                className="inline-flex h-11 w-full items-center justify-center border border-neutral-300 bg-neutral-900 px-4 text-sm font-semibold text-white hover:bg-neutral-800"
+                className="inline-flex h-11 w-full items-center justify-center rounded-md border border-neutral-300 bg-neutral-900 px-4 text-sm font-semibold text-white hover:bg-neutral-800"
               >
                 Google로 로그인
               </button>

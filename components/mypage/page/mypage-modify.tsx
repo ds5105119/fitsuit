@@ -1,14 +1,14 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getUserProfileByEmail } from "@/lib/db/queries";
-import { MyPageModifyForm } from "./mypage-modify-form";
+import { MyPageModifyForm } from "../mypage-modify-form";
 
 export async function MyPageModify() {
   const session = await auth();
   const email = session?.user?.email;
 
   if (!email) {
-    redirect("/mypage/login?callbackUrl=/mypage/modify");
+    redirect("/");
   }
 
   const profile = await getUserProfileByEmail(email);

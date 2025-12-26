@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import type { ConfigOption, WearCategory } from "./types";
 import { TicketsIcon, XIcon } from "lucide-react";
 import { Button } from "../ui/button";
-import { LoginDialog } from "@/components/login-dialog";
+import { LoginDialog } from "@/components/auth/login-dialog";
 
 type SummaryViewProps = {
   previewUrl: string;

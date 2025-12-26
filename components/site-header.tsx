@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
-import { LoginDialog } from "@/components/login-dialog";
+import { LoginDialog } from "@/components/auth/login-dialog";
 
 import { mainNav, secondaryNav } from "@/lib/constants";
 import { useScroll } from "@/hooks/use-scroll";
