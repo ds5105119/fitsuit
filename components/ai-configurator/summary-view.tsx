@@ -19,9 +19,10 @@ type SummaryViewProps = {
   summaryItems: [WearCategory, Record<string, ConfigOption>][];
   onEdit: () => void;
   onSelectOption: (cat: WearCategory, groupKey?: string) => void;
+  onOrderComplete?: () => void;
 };
 
-export function SummaryView({ previewUrl, backgroundPreview, originalUpload, summaryItems, onEdit, onSelectOption }: SummaryViewProps) {
+export function SummaryView({ previewUrl, backgroundPreview, originalUpload, summaryItems, onEdit, onSelectOption, onOrderComplete }: SummaryViewProps) {
   const router = useRouter();
   const { status } = useSession();
   const hero = previewUrl || backgroundPreview || originalUpload || "";
@@ -132,25 +133,13 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
       const orderId = data?.order?.id;
       if (typeof orderId === "string") {
         toast.success("주문이 전송되었습니다.");
-        try {
-          localStorage.removeItem("ai-configurator-state");
-          localStorage.removeItem("ai-configurator-measurements");
-          sessionStorage.removeItem("ai-configurator-preview-latest");
-        } catch {
-          // ignore storage errors
-        }
+        onOrderComplete?.();
         router.push(`/mypage/orders/${orderId}`);
         return;
       }
 
       toast.success("주문이 전송되었습니다.");
-      try {
-        localStorage.removeItem("ai-configurator-state");
-        localStorage.removeItem("ai-configurator-measurements");
-        sessionStorage.removeItem("ai-configurator-preview-latest");
-      } catch {
-        // ignore storage errors
-      }
+      onOrderComplete?.();
       router.push("/mypage");
     } catch (e: any) {
       const message = e?.message || "주문 전송 중 오류가 발생했습니다.";
@@ -302,11 +291,9 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
                   <p className="text-xs lg:text-sm text-neutral-600">2-3 weeks</p>
                 </div>
               </div>
-              <Button variant="outline" onClick={onEdit}>
-                계속 편집
-              </Button>
+              <Button variant="outline">매장 방문</Button>
               <Button onClick={handleOrderClick} disabled={orderSubmitting}>
-                {orderSubmitting ? "전송 중..." : "컨시어지 주문 전송"}
+                {orderSubmitting ? "전송 중..." : "주문하기"}
               </Button>
             </div>
           </div>
@@ -328,9 +315,9 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
           </div>
 
           <div className="flex space-x-2">
-            <Button variant="outline">Finish in-store</Button>
+            <Button variant="outline">매장 방문</Button>
             <Button onClick={handleOrderClick} disabled={orderSubmitting}>
-              {orderSubmitting ? "전송 중..." : "컨시어지 주문 전송"}
+              {orderSubmitting ? "전송 중..." : "주문하기"}
             </Button>
           </div>
         </div>

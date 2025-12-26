@@ -34,15 +34,15 @@ export function AIConfigurator() {
   const [viewMode, setViewMode] = useState<"config" | "summary">("config");
 
   const cloneSelections = (input: SelectionState) => JSON.parse(JSON.stringify(input)) as SelectionState;
-  const [selected, setSelected] = useState<SelectionState>(buildInitialSelections);
-  const [presets, setPresets] = useState<Preset[]>(() =>
+  const buildDefaultPresets = () =>
     Array.from({ length: 3 }).map((_, idx) => ({
       id: idx,
       name: `프리셋 ${idx + 1}`,
       selections: cloneSelections(buildInitialSelections()),
       previewUrl: "",
     }))
-  );
+  const [selected, setSelected] = useState<SelectionState>(buildInitialSelections);
+  const [presets, setPresets] = useState<Preset[]>(buildDefaultPresets);
 
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [previewOwner, setPreviewOwner] = useState(0);
@@ -58,6 +58,33 @@ export function AIConfigurator() {
   const dragPosRef = useRef<{ x: number; scroll: number }>({ x: 0, scroll: 0 });
   const applyingPresetRef = useRef(false);
   const skipSaveRef = useRef(false);
+
+  const resetConfigurator = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem("ai-configurator-measurements");
+      sessionStorage.removeItem(STORAGE_PREVIEW_KEY);
+    } catch {
+      // ignore storage errors
+    }
+    restoredPreviewRef.current = null;
+    setActiveTab("사진 업로드");
+    setActiveGroup({});
+    setSelected(buildInitialSelections());
+    setPresets(buildDefaultPresets());
+    setPreviewUrl("");
+    setPreviewOwner(0);
+    setUserImage(null);
+    setOriginalUpload(null);
+    setBackgroundPreview(null);
+    setActivePreset(0);
+    setViewMode("config");
+    setPresetOpen(false);
+    setError(null);
+    setShowAlert(false);
+    setLoading(false);
+    setUploadProcessing(false);
+  };
 
   const handleSelect = (category: WearCategory, groupKey: string, option: ConfigOption) => {
     setSelected((prev) => ({
@@ -365,6 +392,7 @@ export function AIConfigurator() {
             [cat]: groupKey && groupKey !== "default" ? groupKey : null,
           }));
         }}
+        onOrderComplete={resetConfigurator}
       />
     );
   }
