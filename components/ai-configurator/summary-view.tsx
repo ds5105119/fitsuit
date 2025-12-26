@@ -132,11 +132,25 @@ export function SummaryView({ previewUrl, backgroundPreview, originalUpload, sum
       const orderId = data?.order?.id;
       if (typeof orderId === "string") {
         toast.success("주문이 전송되었습니다.");
+        try {
+          localStorage.removeItem("ai-configurator-state");
+          localStorage.removeItem("ai-configurator-measurements");
+          sessionStorage.removeItem("ai-configurator-preview-latest");
+        } catch {
+          // ignore storage errors
+        }
         router.push(`/mypage/orders/${orderId}`);
         return;
       }
 
       toast.success("주문이 전송되었습니다.");
+      try {
+        localStorage.removeItem("ai-configurator-state");
+        localStorage.removeItem("ai-configurator-measurements");
+        sessionStorage.removeItem("ai-configurator-preview-latest");
+      } catch {
+        // ignore storage errors
+      }
       router.push("/mypage");
     } catch (e: any) {
       const message = e?.message || "주문 전송 중 오류가 발생했습니다.";

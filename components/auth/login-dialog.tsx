@@ -64,7 +64,7 @@ export function LoginDialog({ open, defaultOpen = false, onOpenChange, callbackU
           if (!next && onCloseHref) router.push(onCloseHref);
         }}
       >
-        <DialogContent showClose={false} className="w-full h-full max-w-none rounded-none p-0 sm:h-3/4 sm:max-w-sm sm:rounded-xl outline-none">
+        <DialogContent showClose={false} className="w-full h-full max-w-none rounded-none p-0 sm:h-3/4 sm:max-w-sm sm:rounded-xl outline-none overflow-y-auto">
           <div className="relative flex h-full flex-col">
             <DialogHeader className="sr-only">
               <DialogTitle>로그인</DialogTitle>
@@ -220,7 +220,7 @@ export function LoginDialog({ open, defaultOpen = false, onOpenChange, callbackU
         if (!next && onCloseHref) router.push(onCloseHref);
       }}
     >
-      <DialogContent showClose={false} className="w-full h-full max-w-none rounded-none p-0 sm:h-3/4 sm:max-w-sm sm:rounded-xl outline-none">
+      <DialogContent showClose={false} className="w-full h-full max-w-none rounded-none p-0 sm:h-3/4 sm:max-w-sm sm:rounded-xl outline-none overflow-y-auto">
         <div className="relative flex h-full flex-col">
           <DialogHeader className="sr-only">
             <DialogTitle>로그인</DialogTitle>
